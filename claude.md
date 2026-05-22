@@ -1,62 +1,64 @@
-# Claude Development Guide
+# Claude 開発ガイド
 
-## Project Overview
+## プロジェクト概要
 
-This project is a cloud-based CRM / SFA SaaS system designed for IT companies and software vendors.
+本プロジェクトは、IT企業・ソフトウェア企業向けのCRM / SFA SaaSシステムである。
 
-The system is intended to support:
-- Customer management (CRM)
-- Sales activity management (SFA)
-- Proposal management
-- Sales workflow optimization
-- AI-assisted sales operations
+主な目的：
 
-This SaaS is also designed to align with the Japanese Digitalization / AI Subsidy requirements (共P-01 顧客対応・販売支援).
+- 顧客管理（CRM）
+- 営業活動管理（SFA）
+- 提案管理
+- 営業業務効率化
+- AIによる営業支援
 
----
-
-# Core Features
-
-## CRM Features
-
-- Customer management
-- Contact history
-- Notes and memos
-- Customer search and filtering
-
-## SFA Features
-
-- Deal / opportunity management
-- Sales status management
-- Activity logs
-- Task management
-- Sales pipeline tracking
-
-## Dashboard Features
-
-- Sales overview
-- Deal progress
-- KPI summary
-
-## AI Features (Phase 2+)
-
-- AI proposal draft generation
-- AI sales email generation
-- AI meeting summary
-- AI customer analysis
+また、本システムは「デジタル化・AI導入補助金」の  
+共P-01（顧客対応・販売支援）に対応することを目的とする。
 
 ---
 
-# Tech Stack
+# 主要機能
 
-## Frontend
+## CRM機能
 
-- Next.js (App Router)
+- 顧客管理
+- 商談履歴管理
+- メモ管理
+- 顧客検索・フィルタ
+
+## SFA機能
+
+- 商談管理
+- 営業ステータス管理
+- 活動履歴管理
+- タスク管理
+- 営業進捗管理
+
+## ダッシュボード機能
+
+- 営業状況サマリー
+- 商談進捗一覧
+- KPI表示
+
+## AI機能（Phase2以降）
+
+- AI提案書生成
+- AI営業メール生成
+- AI商談要約
+- AI顧客分析
+
+---
+
+# 技術構成
+
+## フロントエンド
+
+- Next.js（App Router）
 - TypeScript
 - Tailwind CSS
 - shadcn/ui
 
-## Backend
+## バックエンド
 
 - Supabase
   - PostgreSQL
@@ -73,47 +75,47 @@ This SaaS is also designed to align with the Japanese Digitalization / AI Subsid
 
 ---
 
-# Development Rules
+# 開発ルール
 
-## General
+## 基本方針
 
-- Keep implementation simple.
-- Avoid overengineering.
-- Prefer maintainability over cleverness.
-- Use clean and readable TypeScript.
+- シンプルな実装を優先する
+- 過度な設計を避ける
+- 可読性・保守性を重視する
+- 分かりやすいTypeScriptを書く
 
-## UI Rules
+## UIルール
 
-- Use shadcn/ui components whenever possible.
-- Keep UI minimal and business-oriented.
-- Use responsive layouts.
-- Prioritize desktop usability.
-- Avoid excessive animations.
+- 可能な限りshadcn/uiを利用する
+- シンプルで業務向けUIにする
+- レスポンシブ対応する
+- PC利用を優先する
+- 過度なアニメーションは禁止
 
-## Code Rules
+## コードルール
 
-- Use TypeScript strict mode.
-- Use async/await.
-- Prefer Server Components where possible.
-- Keep business logic separated from UI.
-- Use reusable components.
+- TypeScript strict modeを使用
+- async/awaitを利用
+- 可能な限りServer Componentsを使用
+- 業務ロジックとUIを分離
+- 再利用可能なコンポーネント化を意識
 
-## API Rules
+## APIルール
 
-- Use Server Actions or Route Handlers.
-- Validate all input.
-- Handle errors gracefully.
+- Server Actions または Route Handlers を利用
+- 入力値検証を行う
+- エラーハンドリングを実装する
 
-## Database Rules
+## DBルール
 
-- Use UUID primary keys.
-- Include created_at and updated_at fields.
-- Use foreign key relationships properly.
-- Avoid duplicated data.
+- UUIDを主キーに使用
+- created_at / updated_at を保持
+- 外部キーを適切に設定
+- 重複データを避ける
 
 ---
 
-# Folder Structure
+# フォルダ構成
 
 ```txt
 /app
