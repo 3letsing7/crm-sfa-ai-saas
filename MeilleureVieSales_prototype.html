@@ -347,7 +347,7 @@ expenses:{title:'支払管理',render(){return`
 
 ai:{title:'AI営業支援',render(){return`
   <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px">
-    ${[['ti-file-text','AI提案書生成','顧客情報・商談内容から提案書初稿を自動生成'],['ti-mail','AI営業メール','状況に応じた最適なアプローチメールを生成'],['ti-notes','AI商談要約','商談メモをAIが整理・要約'],['ti-file-invoice','AI請求書ドラフト','受注情報から請求書の初稿を自動生成']].map(([icon,title,desc])=>`
+    ${[['ti-file-text','AI提案書生成','顧客情報・商談内容から提案書初稿を自動生成'],['ti-mail','AI営業メール','状況に応じた最適なアプローチメールを生成'],['ti-notes','AI顧客分析・商談要約・次回提案','顧客データを分析して商談内容を自動要約・次アクション提案']].map(([icon,title,desc])=>`
       <div class="card" style="opacity:.8">
         <div style="display:flex;align-items:center;gap:9px;margin-bottom:8px">
           <i class="ti ${icon}" style="font-size:20px;color:#534AB7"></i>
