@@ -91,9 +91,10 @@ input:focus,select:focus,textarea:focus{border-color:#534AB7}
     <div class="nav-item" onclick="show('orders')"><i class="ti ti-shopping-cart"></i>受注管理</div>
     <div class="nav-item" onclick="show('purchases')"><i class="ti ti-package"></i>発注・仕入管理</div>
     <div class="nav-sep"></div>
-    <div class="nav-section">決済</div>
+    <div class="nav-section">決済・債権債務</div>
     <div class="nav-item" onclick="show('payments')"><i class="ti ti-cash"></i>入金管理</div>
     <div class="nav-item" onclick="show('expenses')"><i class="ti ti-credit-card"></i>支払管理</div>
+    <div class="nav-item" onclick="show('checkout')"><i class="ti ti-device-mobile-payment"></i>決済画面（顧客向け）</div>
     <div class="nav-sep"></div>
   </div>
   <div class="main">
@@ -202,6 +203,7 @@ invoices:{title:'請求書管理（インボイス対応）',render(){return`
     </div>
     <div style="display:flex;gap:6px">
       <button class="btn-sm"><i class="ti ti-download" style="font-size:12px;vertical-align:-1px"></i> CSV</button>
+      <button class="btn-sm" onclick="show('checkout')"><i class="ti ti-link" style="font-size:12px;vertical-align:-1px"></i> 決済リンク送付</button>
       <button class="btn-p"><i class="ti ti-plus" style="font-size:12px;vertical-align:-1px"></i> 請求書作成</button>
     </div>
   </div>
@@ -345,6 +347,220 @@ expenses:{title:'支払管理',render(){return`
     </div>
   </div>`}},
 
+checkout:{title:'決済画面（顧客向け）— INV-2026-041',render(){return`
+  <div style="display:flex;gap:0;border:0.5px solid var(--border-tertiary);border-radius:var(--radius-lg);overflow:hidden;background:var(--bg-primary)">
+
+    <!-- 左：決済フォーム -->
+    <div style="flex:1;padding:28px 32px;border-right:0.5px solid var(--border-tertiary);background:var(--bg-primary)">
+      <div style="font-size:12px;font-weight:500;color:var(--text-secondary);margin-bottom:20px;display:flex;align-items:center;gap:6px">
+        <i class="ti ti-building-skyscraper" style="font-size:15px;color:#534AB7"></i>MeilleureVieSales
+      </div>
+
+      <!-- かんたん決済 -->
+      <div style="font-size:12px;font-weight:500;color:var(--text-primary);margin-bottom:4px">かんたん決済</div>
+      <div style="font-size:10px;color:var(--text-tertiary);margin-bottom:12px;display:flex;align-items:center;gap:3px">
+        <i class="ti ti-lock" style="font-size:11px"></i>すべての取引は安全で、暗号化されています。
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px">
+        <div style="border:0.5px solid var(--border-secondary);border-radius:var(--radius-md);padding:8px 0;display:flex;align-items:center;justify-content:center;cursor:pointer;background:#5433FF;color:#fff;font-size:12px;font-weight:500;gap:5px">
+          <i class="ti ti-credit-card"></i> Shop Pay
+        </div>
+        <div style="border:0.5px solid var(--border-secondary);border-radius:var(--radius-md);padding:8px 0;display:flex;align-items:center;justify-content:center;cursor:pointer;background:#000;color:#fff;font-size:12px;gap:4px">
+          <span style="color:#4285F4;font-weight:700">G</span><span>Pay</span>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;font-size:11px;color:var(--text-tertiary)">
+        <div style="flex:1;height:0.5px;background:var(--border-tertiary)"></div>または<div style="flex:1;height:0.5px;background:var(--border-tertiary)"></div>
+      </div>
+
+      <!-- メール -->
+      <div style="margin-bottom:9px">
+        <div style="font-size:10px;color:var(--text-secondary);margin-bottom:3px">メールアドレス（請求書送付先）</div>
+        <input type="email" value="suzuki@future-it.co.jp" style="width:100%;font-size:12px;padding:7px 9px">
+      </div>
+      <div style="display:flex;align-items:center;gap:5px;margin-bottom:12px">
+        <input type="checkbox" style="width:12px;height:12px;accent-color:#534AB7">
+        <span style="font-size:11px;color:var(--text-secondary)">お得な情報をメールで受け取る</span>
+      </div>
+
+      <!-- 支払方法 -->
+      <div style="font-size:12px;font-weight:500;color:var(--text-primary);margin-bottom:9px">お支払い方法</div>
+      <div style="border:0.5px solid var(--border-secondary);border-radius:var(--radius-md);overflow:hidden;margin-bottom:12px">
+
+        <!-- クレジットカード -->
+        <div id="opt-card" style="padding:10px 11px;display:flex;align-items:center;gap:9px;cursor:pointer;background:#EEEDFE;border-bottom:0.5px solid var(--border-tertiary)" onclick="selPay('card')">
+          <input type="radio" name="pay" checked style="accent-color:#534AB7;width:13px;height:13px;flex-shrink:0">
+          <span style="font-size:12px;color:var(--text-primary);flex:1">クレジットカード</span>
+          <div style="display:flex;gap:3px;align-items:center">
+            <div style="width:28px;height:18px;border-radius:3px;border:0.5px solid var(--border-tertiary);background:#fff;display:flex;align-items:center;justify-content:center;font-size:7px;font-weight:700;color:#1a1f71">VISA</div>
+            <div style="width:28px;height:18px;border-radius:3px;background:#EB001B;display:flex;align-items:center;justify-content:center;font-size:7px;font-weight:700;color:#fff">MC</div>
+            <div style="width:28px;height:18px;border-radius:3px;background:#016fcf;display:flex;align-items:center;justify-content:center;font-size:7px;font-weight:700;color:#fff">AMEX</div>
+            <span style="font-size:10px;color:var(--text-tertiary)">+3</span>
+          </div>
+        </div>
+        <div id="card-fields" style="padding:9px 11px;background:var(--bg-secondary);border-bottom:0.5px solid var(--border-tertiary)">
+          <div style="position:relative;margin-bottom:7px">
+            <input type="text" placeholder="カード番号" style="width:100%;font-size:12px;padding:7px 32px 7px 9px" oninput="this.value=this.value.replace(/\D/g,'').slice(0,16).replace(/(.{4})/g,'$1 ').trim()">
+            <i class="ti ti-lock" style="position:absolute;right:9px;top:50%;transform:translateY(-50%);font-size:13px;color:var(--text-tertiary)"></i>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:7px">
+            <input type="text" placeholder="有効期限（月/年）" style="font-size:12px;padding:7px 9px" maxlength="5" oninput="let v=this.value.replace(/\D/g,'').slice(0,4);if(v.length>=3)v=v.slice(0,2)+'/'+v.slice(2);this.value=v">
+            <div style="position:relative">
+              <input type="text" placeholder="セキュリティコード" style="width:100%;font-size:12px;padding:7px 28px 7px 9px" maxlength="4">
+              <i class="ti ti-help" style="position:absolute;right:9px;top:50%;transform:translateY(-50%);font-size:13px;color:var(--text-tertiary)"></i>
+            </div>
+          </div>
+          <input type="text" placeholder="カードの名義人" style="width:100%;font-size:12px;padding:7px 9px;text-transform:uppercase">
+        </div>
+
+        <!-- PayPay -->
+        <div id="opt-pp" style="padding:10px 11px;display:flex;align-items:center;gap:9px;cursor:pointer;border-bottom:0.5px solid var(--border-tertiary)" onclick="selPay('pp')">
+          <input type="radio" name="pay" style="accent-color:#534AB7;width:13px;height:13px;flex-shrink:0">
+          <span style="font-size:12px;color:var(--text-primary);flex:1">PayPay</span>
+          <span style="font-size:13px;font-weight:700;color:#FF0033">P</span>
+        </div>
+        <div id="pp-fields" style="display:none;padding:9px 11px;background:var(--bg-secondary);font-size:11px;color:var(--text-secondary);border-bottom:0.5px solid var(--border-tertiary)">
+          「今すぐ支払う」ボタンを押すとPayPayアプリに移動します。
+        </div>
+
+        <!-- 銀行振込 -->
+        <div id="opt-bank" style="padding:10px 11px;display:flex;align-items:center;gap:9px;cursor:pointer" onclick="selPay('bank')">
+          <input type="radio" name="pay" style="accent-color:#534AB7;width:13px;height:13px;flex-shrink:0">
+          <span style="font-size:12px;color:var(--text-primary);flex:1">銀行振込</span>
+          <i class="ti ti-building-bank" style="font-size:15px;color:var(--text-tertiary)"></i>
+        </div>
+        <div id="bank-fields" style="display:none;padding:9px 11px;background:var(--bg-secondary);font-size:11px;color:var(--text-secondary)">
+          <div style="font-weight:500;color:var(--text-primary);margin-bottom:4px">振込先口座情報</div>
+          <div>銀行名：〇〇銀行　新宿支店 ／ 口座種別：普通 ／ 口座番号：1234567</div>
+          <div>口座名義：カ）〇〇〇〇</div>
+          <div style="margin-top:5px;color:var(--text-tertiary)">※振込手数料はご負担ください。入金確認後に領収書を発行します。</div>
+        </div>
+      </div>
+
+      <!-- 請求先住所 -->
+      <div style="font-size:12px;font-weight:500;color:var(--text-primary);margin-bottom:9px">請求先住所</div>
+      <div style="margin-bottom:7px">
+        <div style="font-size:10px;color:var(--text-secondary);margin-bottom:3px">会社名</div>
+        <input type="text" value="フューチャーIT株式会社" style="width:100%;font-size:12px;padding:7px 9px">
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:7px">
+        <div>
+          <div style="font-size:10px;color:var(--text-secondary);margin-bottom:3px">郵便番号</div>
+          <input type="text" placeholder="100-0001" style="width:100%;font-size:12px;padding:7px 9px">
+        </div>
+        <div>
+          <div style="font-size:10px;color:var(--text-secondary);margin-bottom:3px">都道府県</div>
+          <input type="text" placeholder="東京都" style="width:100%;font-size:12px;padding:7px 9px">
+        </div>
+      </div>
+      <div style="margin-bottom:14px">
+        <div style="font-size:10px;color:var(--text-secondary);margin-bottom:3px">住所</div>
+        <input type="text" placeholder="〇〇区〇〇 1-2-3" style="width:100%;font-size:12px;padding:7px 9px">
+      </div>
+
+      <!-- 支払いボタン -->
+      <button id="pay-btn" onclick="doPay()" style="width:100%;padding:11px;background:#534AB7;color:#fff;border:none;border-radius:var(--radius-md);font-size:13px;font-weight:500;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;font-family:inherit">
+        <i class="ti ti-lock"></i> 今すぐ支払う — ¥3,800,000
+      </button>
+      <div style="font-size:10px;color:var(--text-tertiary);text-align:center;margin-top:7px;display:flex;align-items:center;justify-content:center;gap:4px">
+        <i class="ti ti-shield-check" style="font-size:11px"></i>SSL暗号化通信で保護されています
+      </div>
+    </div>
+
+    <!-- 右：注文サマリー -->
+    <div style="width:280px;padding:28px 24px;background:var(--bg-secondary)">
+      <div style="font-size:11px;font-weight:500;color:var(--text-secondary);margin-bottom:12px;display:flex;align-items:center;gap:4px">
+        <i class="ti ti-file-invoice" style="font-size:13px;color:#534AB7"></i>請求書 INV-2026-041
+      </div>
+
+      <!-- 商品 -->
+      <div style="display:flex;align-items:flex-start;gap:9px;padding:9px 0;border-bottom:0.5px solid var(--border-tertiary)">
+        <div style="width:38px;height:38px;border-radius:6px;background:#EEEDFE;border:0.5px solid var(--border-tertiary);display:flex;align-items:center;justify-content:center;flex-shrink:0;position:relative">
+          <i class="ti ti-cpu" style="font-size:17px;color:#534AB7"></i>
+          <div style="position:absolute;top:-5px;right:-5px;width:15px;height:15px;border-radius:50%;background:#534AB7;color:#fff;font-size:9px;font-weight:500;display:flex;align-items:center;justify-content:center">1</div>
+        </div>
+        <div style="flex:1">
+          <div style="font-size:11px;font-weight:500;color:var(--text-primary)">クラウド移行PJサービス</div>
+          <div style="font-size:10px;color:var(--text-tertiary);margin-top:2px">フューチャーIT / 2026年6月分</div>
+        </div>
+        <div style="font-size:11px;font-weight:500;color:var(--text-primary)">¥3,454,545</div>
+      </div>
+
+      <!-- クーポン -->
+      <div style="display:flex;gap:5px;margin:10px 0">
+        <input id="coupon" type="text" placeholder="クーポンコード" style="flex:1;font-size:11px;padding:6px 8px">
+        <button onclick="applyCoupon()" style="padding:6px 10px;border:0.5px solid var(--border-secondary);border-radius:var(--radius-md);background:var(--bg-primary);font-size:11px;color:var(--text-primary);cursor:pointer;font-family:inherit">適用</button>
+      </div>
+      <div id="coupon-msg" style="font-size:10px;display:none;margin-bottom:6px"></div>
+
+      <div style="height:0.5px;background:var(--border-tertiary);margin-bottom:8px"></div>
+
+      <!-- 金額内訳 -->
+      <div style="display:flex;justify-content:space-between;font-size:11px;padding:3px 0;color:var(--text-secondary)"><span>小計（税抜）</span><span>¥3,454,545</span></div>
+      <div style="display:flex;justify-content:space-between;font-size:11px;padding:3px 0;color:var(--text-secondary)"><span>消費税（10%）</span><span>¥345,455</span></div>
+      <div id="discount-row" style="display:none;justify-content:space-between;font-size:11px;padding:3px 0;color:#0F6E56"><span>割引</span><span id="discount-amt"></span></div>
+      <div style="height:0.5px;background:var(--border-tertiary);margin:8px 0"></div>
+      <div style="display:flex;justify-content:space-between;font-size:13px;font-weight:500;color:var(--text-primary);padding:3px 0"><span>合計</span><span>¥3,800,000</span></div>
+      <div style="font-size:10px;color:var(--text-tertiary);margin-top:2px">¥345,455 の消費税（10%）を含む</div>
+
+      <!-- インボイス情報 -->
+      <div style="background:#EEEDFE;border:0.5px solid #AFA9EC;border-radius:var(--radius-md);padding:8px 10px;font-size:10px;color:#3C3489;margin-top:14px;line-height:1.7">
+        <div style="font-weight:500;margin-bottom:3px"><i class="ti ti-circle-check" style="font-size:11px"></i> 適格請求書（インボイス）対応</div>
+        <div>登録番号：T1234567890123</div>
+        <div>取引内容：クラウド移行PJサービス</div>
+        <div>税率：10% ／ 消費税額：¥345,455</div>
+        <div style="margin-top:3px;color:#534AB7">支払い完了後に適格請求書PDFを発行します。</div>
+      </div>
+
+      <!-- ルート①の説明 -->
+      <div style="margin-top:12px;font-size:10px;color:var(--text-tertiary);line-height:1.6">
+        <i class="ti ti-info-circle" style="font-size:11px;vertical-align:-1px"></i>
+        この画面は<strong style="color:var(--text-secondary)">請求書管理</strong>の「決済リンク送付」から遷移します（ルート①）。
+        支払い完了後、入金管理画面で自動消込処理が行われます。
+      </div>
+    </div>
+  </div>
+
+  <script>
+  function selPay(type){
+    ['card','pp','bank'].forEach(t=>{
+      document.getElementById('opt-'+t).style.background='';
+      const f=document.getElementById(t===\'card\'?\'card-fields\':t+\'-fields\');
+      if(f) f.style.display=\'none\';
+    });
+    document.getElementById(\'opt-\'+type).style.background=\'#EEEDFE\';
+    const fields=document.getElementById(type===\'card\'?\'card-fields\':type+\'-fields\');
+    if(fields) fields.style.display=\'block\';
+    document.querySelectorAll(\'[name=pay]\')[{card:0,pp:1,bank:2}[type]].checked=true;
+  }
+  function applyCoupon(){
+    const code=document.getElementById(\'coupon\').value.trim();
+    const msg=document.getElementById(\'coupon-msg\');
+    const row=document.getElementById(\'discount-row\');
+    msg.style.display=\'block\';
+    if(code.toUpperCase()===\'SALES10\'){
+      msg.style.color=\'#0F6E56\'; msg.textContent=\'クーポン適用：10%割引\';
+      row.style.display=\'flex\';
+      document.getElementById(\'discount-amt\').textContent=\'−¥380,000\';
+    } else if(!code){
+      msg.style.color=\'#993C1D\'; msg.textContent=\'コードを入力してください\';
+      row.style.display=\'none\';
+    } else {
+      msg.style.color=\'#993C1D\'; msg.textContent=\'このクーポンコードは無効です\';
+      row.style.display=\'none\';
+    }
+  }
+  function doPay(){
+    const btn=document.getElementById(\'pay-btn\');
+    btn.innerHTML=\'処理中...\'; btn.disabled=true; btn.style.opacity=\'0.7\';
+    setTimeout(()=>{
+      btn.innerHTML=\'<i class="ti ti-circle-check"></i> 支払い完了 — 領収書を送信しました\';
+      btn.style.background=\'#1D9E75\'; btn.style.opacity=\'1\';
+    },1800);
+  }
+  <\/script>
+`}},
+
 ai:{title:'AI営業支援',render(){return`
   <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px">
     ${[['ti-file-text','AI提案書生成','顧客情報・商談内容から提案書初稿を自動生成'],['ti-mail','AI営業メール','状況に応じた最適なアプローチメールを生成'],['ti-notes','AI顧客分析・商談要約・次回提案','顧客データを分析して商談内容を自動要約・次アクション提案']].map(([icon,title,desc])=>`
@@ -374,7 +590,7 @@ function show(id){
   document.getElementById('page-title').textContent=page.title;
   document.getElementById('page-content').innerHTML=page.render();
   document.querySelectorAll('.nav-item').forEach(el=>el.classList.remove('active'));
-  const map={dashboard:0,customers:1,deals:2,tasks:3,invoices:4,orders:5,purchases:6,payments:7,expenses:8,ai:9};
+  const map={dashboard:0,customers:1,deals:2,tasks:3,ai:4,invoices:5,orders:6,purchases:7,payments:8,expenses:9,checkout:10};
   const items=document.querySelectorAll('.nav-item');
   if(map[id]!==undefined) items[map[id]]?.classList.add('active');
 }
