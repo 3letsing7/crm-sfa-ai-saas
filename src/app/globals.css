@@ -1,0 +1,91 @@
+@import "tailwindcss";
+
+:root {
+  --background: #f7f8fa;
+  --foreground: #1c2333;
+
+  --card: #ffffff;
+  --card-foreground: #1c2333;
+
+  --popover: #ffffff;
+  --popover-foreground: #1c2333;
+
+  --primary: #2f3ea0;
+  --primary-foreground: #ffffff;
+
+  --secondary: #eef0f7;
+  --secondary-foreground: #2f3ea0;
+
+  --muted: #eef0f4;
+  --muted-foreground: #667085;
+
+  --accent: #e8ecff;
+  --accent-foreground: #2f3ea0;
+
+  --destructive: #d0402a;
+  --destructive-foreground: #ffffff;
+
+  --success: #1c8a53;
+  --success-foreground: #ffffff;
+  --warning: #b4791f;
+  --warning-foreground: #ffffff;
+
+  --border: #e2e5ec;
+  --input: #e2e5ec;
+  --ring: #2f3ea0;
+
+  --sidebar: #171b2e;
+  --sidebar-foreground: #c9cdda;
+  --sidebar-active: #2f3ea0;
+  --sidebar-active-foreground: #ffffff;
+
+  --radius: 0.625rem;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-success: var(--success);
+  --color-success-foreground: var(--success-foreground);
+  --color-warning: var(--warning);
+  --color-warning-foreground: var(--warning-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-active: var(--sidebar-active);
+  --color-sidebar-active-foreground: var(--sidebar-active-foreground);
+
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+
+  --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", "Hiragino Sans",
+    "Hiragino Kaku Gothic ProN", "Noto Sans JP", Meiryo, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+}
+
+* {
+  border-color: var(--border);
+}
