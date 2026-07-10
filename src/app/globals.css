@@ -1,45 +1,47 @@
 @import "tailwindcss";
 
 :root {
-  --background: #f7f8fa;
-  --foreground: #1c2333;
+  --background: #f5f4f0;
+  --foreground: #1a1a1a;
 
   --card: #ffffff;
-  --card-foreground: #1c2333;
+  --card-foreground: #1a1a1a;
 
   --popover: #ffffff;
-  --popover-foreground: #1c2333;
+  --popover-foreground: #1a1a1a;
 
-  --primary: #2f3ea0;
+  --primary: #534ab7;
   --primary-foreground: #ffffff;
 
-  --secondary: #eef0f7;
-  --secondary-foreground: #2f3ea0;
+  --secondary: #eeedfe;
+  --secondary-foreground: #3c3489;
 
-  --muted: #eef0f4;
-  --muted-foreground: #667085;
+  --muted: #f5f4f0;
+  --muted-foreground: #5f5e5a;
 
-  --accent: #e8ecff;
-  --accent-foreground: #2f3ea0;
+  --accent: #eeedfe;
+  --accent-foreground: #3c3489;
 
-  --destructive: #d0402a;
+  --destructive: #a32d2d;
   --destructive-foreground: #ffffff;
 
-  --success: #1c8a53;
+  --success: #0f6e56;
   --success-foreground: #ffffff;
-  --warning: #b4791f;
+  --warning: #854f0b;
   --warning-foreground: #ffffff;
 
-  --border: #e2e5ec;
-  --input: #e2e5ec;
-  --ring: #2f3ea0;
+  --border: rgba(0, 0, 0, 0.12);
+  --border-strong: rgba(0, 0, 0, 0.22);
+  --input: rgba(0, 0, 0, 0.22);
+  --ring: #534ab7;
 
-  --sidebar: #171b2e;
-  --sidebar-foreground: #c9cdda;
-  --sidebar-active: #2f3ea0;
-  --sidebar-active-foreground: #ffffff;
+  --sidebar: #f5f4f0;
+  --sidebar-foreground: #5f5e5a;
+  --sidebar-section: #888780;
+  --sidebar-active: #eeedfe;
+  --sidebar-active-foreground: #534ab7;
 
-  --radius: 0.625rem;
+  --radius: 0.5rem;
 }
 
 @theme inline {
@@ -64,10 +66,12 @@
   --color-warning: var(--warning);
   --color-warning-foreground: var(--warning-foreground);
   --color-border: var(--border);
+  --color-border-strong: var(--border-strong);
   --color-input: var(--input);
   --color-ring: var(--ring);
   --color-sidebar: var(--sidebar);
   --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-section: var(--sidebar-section);
   --color-sidebar-active: var(--sidebar-active);
   --color-sidebar-active-foreground: var(--sidebar-active-foreground);
 
