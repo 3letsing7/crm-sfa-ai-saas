@@ -53,7 +53,7 @@ export async function updateCustomer(id: string, formData: FormData) {
 
   revalidatePath("/customers");
   revalidatePath(`/customers/${id}`);
-  redirect(`/customers/${id}`);
+  redirect("/customers");
 }
 
 export async function deleteCustomer(id: string) {
