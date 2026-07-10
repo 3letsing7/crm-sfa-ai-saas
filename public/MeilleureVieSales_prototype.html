@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MeilleureVieSales — CRM/SFA + 受発注・決済 プロトタイプ</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.31.0/dist/tabler-icons.min.css">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f5f4f0;color:#1a1a1a;height:100vh;overflow:hidden}
+:root{
+  --bg-primary:#ffffff;--bg-secondary:#f5f4f0;
+  --text-primary:#1a1a1a;--text-secondary:#5f5e5a;--text-tertiary:#888780;
+  --border-tertiary:rgba(0,0,0,0.12);--border-secondary:rgba(0,0,0,0.22);
+  --radius-md:8px;--radius-lg:12px;
+}
+.app{display:flex;height:100vh;overflow:hidden}
+.sidebar{width:200px;min-width:200px;background:var(--bg-secondary);border-right:0.5px solid var(--border-tertiary);display:flex;flex-direction:column;padding:12px 0;overflow-y:auto}
+.sidebar-logo{padding:0 14px 14px;font-size:11px;font-weight:500;color:var(--text-primary);display:flex;align-items:center;gap:7px;letter-spacing:-0.01em}
+.sidebar-logo i{font-size:17px;color:#534AB7;flex-shrink:0}
+.nav-section{font-size:10px;color:var(--text-tertiary);padding:0 14px 5px;text-transform:uppercase;letter-spacing:.05em;margin-top:4px}
+.nav-item{display:flex;align-items:center;gap:9px;padding:7px 14px;font-size:12px;color:var(--text-secondary);cursor:pointer;transition:background .1s}
+.nav-item:hover{background:var(--bg-primary);color:var(--text-primary)}
+.nav-item.active{background:var(--bg-primary);color:#534AB7;font-weight:500}
+.nav-item.active i{color:#534AB7}
+.nav-item i{font-size:15px;flex-shrink:0}
+.nav-sep{height:1px;background:var(--border-tertiary);margin:8px 0}
+.main{flex:1;overflow:hidden;display:flex;flex-direction:column;min-width:0}
+.topbar{height:44px;border-bottom:0.5px solid var(--border-tertiary);display:flex;align-items:center;justify-content:space-between;padding:0 18px;flex-shrink:0;background:var(--bg-primary)}
+.topbar-title{font-size:14px;font-weight:500;color:var(--text-primary)}
+.topbar-right{display:flex;align-items:center;gap:10px}
+.avatar{width:26px;height:26px;border-radius:50%;background:#EEEDFE;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:500;color:#534AB7}
+.content{flex:1;overflow-y:auto;padding:16px;background:var(--bg-secondary)}
+.kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px}
+.kpi-card{background:var(--bg-primary);border-radius:var(--radius-md);padding:12px 14px;border:0.5px solid var(--border-tertiary)}
+.kpi-label{font-size:11px;color:var(--text-secondary);margin-bottom:5px}
+.kpi-value{font-size:20px;font-weight:500;color:var(--text-primary)}
+.kpi-sub{font-size:11px;margin-top:3px}
+.kpi-up{color:#0F6E56}.kpi-down{color:#993C1D}
+.sh{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.st{font-size:13px;font-weight:500;color:var(--text-primary)}
+.btn-sm{font-size:11px;padding:4px 10px;background:transparent;border:0.5px solid var(--border-secondary);border-radius:var(--radius-md);color:var(--text-secondary);cursor:pointer}
+.btn-sm:hover{background:var(--bg-secondary)}
+.btn-p{background:#534AB7;color:#fff;font-size:11px;padding:4px 12px;border-radius:var(--radius-md);cursor:pointer;border:none}
+.btn-p:hover{background:#3C3489}
+.btn-g{background:#1D9E75;color:#fff;font-size:11px;padding:4px 12px;border-radius:var(--radius-md);cursor:pointer;border:none}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.three-col{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px}
+.card{background:var(--bg-primary);border:0.5px solid var(--border-tertiary);border-radius:var(--radius-lg);padding:14px}
+table{width:100%;border-collapse:collapse;font-size:12px}
+th{text-align:left;padding:6px 7px;font-size:10px;font-weight:500;color:var(--text-tertiary);border-bottom:0.5px solid var(--border-tertiary);text-transform:uppercase;letter-spacing:.04em}
+td{padding:7px 7px;border-bottom:0.5px solid var(--border-tertiary);color:var(--text-primary);vertical-align:middle}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:var(--bg-secondary)}
+input,select,textarea{border:0.5px solid var(--border-secondary);border-radius:var(--radius-md);background:var(--bg-primary);color:var(--text-primary);font-family:inherit;outline:none}
+input:focus,select:focus,textarea:focus{border-color:#534AB7}
+.badge{display:inline-block;font-size:10px;padding:2px 7px;border-radius:99px;font-weight:500}
+.b-new{background:#E1F5EE;color:#0F6E56}
+.b-prop{background:#EEEDFE;color:#3C3489}
+.b-nego{background:#FAEEDA;color:#854F0B}
+.b-won{background:#EAF3DE;color:#3B6D11}
+.b-lost{background:#FCEBEB;color:#A32D2D}
+.b-paid{background:#EAF3DE;color:#3B6D11}
+.b-unpaid{background:#FCEBEB;color:#A32D2D}
+.b-partial{background:#FAEEDA;color:#854F0B}
+.b-pending{background:#EEEDFE;color:#3C3489}
+.pipe-row{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.pipe-label{font-size:11px;color:var(--text-secondary);width:58px;flex-shrink:0}
+.pipe-bg{flex:1;height:5px;background:var(--bg-secondary);border-radius:4px;overflow:hidden}
+.pipe-fill{height:5px;border-radius:4px}
+.pipe-count{font-size:11px;color:var(--text-tertiary);width:22px;text-align:right}
+.sum-row{display:flex;justify-content:space-between;padding:5px 0;font-size:12px;border-bottom:0.5px solid var(--border-tertiary)}
+.sum-row:last-child{border-bottom:none;font-weight:500;font-size:13px;color:var(--text-primary)}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="sidebar">
+    <div class="sidebar-logo">
+      <i class="ti ti-building-skyscraper"></i>MeilleureVieSales
+    </div>
+    <div class="nav-section">CRM / SFA</div>
+    <div class="nav-item active" onclick="show('dashboard')"><i class="ti ti-layout-dashboard"></i>ダッシュボード</div>
+    <div class="nav-item" onclick="show('customers')"><i class="ti ti-building"></i>顧客管理</div>
+    <div class="nav-item" onclick="show('deals')"><i class="ti ti-trending-up"></i>商談管理</div>
+    <div class="nav-item" onclick="show('tasks')"><i class="ti ti-checkbox"></i>タスク管理</div>
+    <div class="nav-item" onclick="show('ai')"><i class="ti ti-sparkles"></i>AI営業支援（AI機能）</div>
+    <div class="nav-sep"></div>
+    <div class="nav-section">受発注</div>
+    <div class="nav-item" onclick="show('invoices')"><i class="ti ti-file-invoice"></i>請求書管理</div>
+    <div class="nav-item" onclick="show('orders')"><i class="ti ti-shopping-cart"></i>受注管理</div>
+    <div class="nav-item" onclick="show('purchases')"><i class="ti ti-package"></i>発注・仕入管理</div>
+    <div class="nav-sep"></div>
+    <div class="nav-section">決済・債権債務</div>
+    <div class="nav-item" onclick="show('payments')"><i class="ti ti-cash"></i>入金管理</div>
+    <div class="nav-item" onclick="show('expenses')"><i class="ti ti-credit-card"></i>支払管理</div>
+    <div class="nav-item" onclick="show('checkout')"><i class="ti ti-device-mobile-payment"></i>決済画面（顧客向け）</div>
+    <div class="nav-sep"></div>
+  </div>
+  <div class="main">
+    <div class="topbar">
+      <span class="topbar-title" id="page-title">ダッシュボード</span>
+      <div class="topbar-right">
+        <i class="ti ti-bell" style="font-size:17px;color:var(--text-secondary)"></i>
+        <div class="avatar">YM</div>
+      </div>
+    </div>
+    <div class="content" id="page-content"></div>
+  </div>
+</div>
+
+<script>
+const pages = {
+
+dashboard:{title:'ダッシュボード',render(){return`
+  <div class="kpi-grid">
+    ${[['売上見込（今月）','¥38.4M','前月比 +12%',true],['未収入金','¥12.6M','3件未消込',false],['進行中商談','24件','先週比 +3',true],['未払費用','¥4.2M','今月期限',false]].map(([l,v,s,up])=>`
+      <div class="kpi-card"><div class="kpi-label">${l}</div><div class="kpi-value">${v}</div>
+      <div class="kpi-sub ${up?'kpi-up':'kpi-down'}"><i class="ti ti-arrow-${up?'up':'down'}-right" style="font-size:10px"></i> ${s}</div></div>`).join('')}
+  </div>
+  <div class="two-col" style="margin-bottom:14px">
+    <div class="card">
+      <div class="sh"><span class="st">商談パイプライン</span><button class="btn-sm" onclick="show('deals')">詳細 →</button></div>
+      ${[['新規接触',8,'#534AB7'],['提案中',5,'#EF9F27'],['交渉中',3,'#D85A30'],['成約',2,'#639922']].map(([l,n,c])=>`
+        <div class="pipe-row"><div class="pipe-label">${l}</div><div class="pipe-bg"><div class="pipe-fill" style="width:${n*10}%;background:${c}"></div></div><div class="pipe-count">${n}</div></div>`).join('')}
+    </div>
+    <div class="card">
+      <div class="sh"><span class="st">入金状況</span><button class="btn-sm" onclick="show('payments')">詳細 →</button></div>
+      ${[['株式会社テクノ','¥5,200,000','消込済','b-paid'],['フューチャーIT','¥3,800,000','未消込','b-unpaid'],['グローバルSys','¥2,100,000','一部消込','b-partial'],['デジタルコア','¥1,500,000','未消込','b-unpaid']].map(([co,amt,status,cls])=>`
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:0.5px solid var(--border-tertiary)">
+          <span style="font-size:12px">${co}</span>
+          <div style="display:flex;align-items:center;gap:8px"><span style="font-size:12px">${amt}</span><span class="badge ${cls}">${status}</span></div>
+        </div>`).join('')}
+    </div>
+  </div>
+  <div class="two-col">
+    <div class="card">
+      <div class="sh"><span class="st">直近の受注</span><button class="btn-sm" onclick="show('orders')">詳細 →</button></div>
+      ${[['INV-2026-042','テクノ・ソリューションズ','¥5.2M'],['INV-2026-041','フューチャーIT','¥3.8M'],['INV-2026-040','グローバルSys','¥2.1M']].map(([no,co,amt])=>`
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:0.5px solid var(--border-tertiary)">
+          <div><div style="font-size:12px;font-weight:500">${no}</div><div style="font-size:10px;color:var(--text-tertiary)">${co}</div></div>
+          <span style="font-size:12px">${amt}</span>
+        </div>`).join('')}
+    </div>
+    <div class="card">
+      <div class="sh"><span class="st">今週の支払予定</span><button class="btn-sm" onclick="show('expenses')">詳細 →</button></div>
+      ${[['AWS（クラウド費用）','¥320,000','06/28'],['Stripe手数料','¥85,000','06/30'],['外注費（デザイン）','¥550,000','07/02']].map(([name,amt,due])=>`
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:0.5px solid var(--border-tertiary)">
+          <div><div style="font-size:12px">${name}</div><div style="font-size:10px;color:var(--text-tertiary)">期限 ${due}</div></div>
+          <span style="font-size:12px;font-weight:500">${amt}</span>
+        </div>`).join('')}
+    </div>
+  </div>`}},
+
+customers:{title:'顧客管理',render(){return`
+  <div class="sh">
+    <div style="display:flex;gap:8px;align-items:center">
+      <input type="text" placeholder="会社名・担当者を検索..." style="width:200px;font-size:12px;padding:4px 9px">
+      <select style="font-size:12px;padding:4px 7px"><option>すべて</option><option>IT企業</option><option>SaaS</option></select>
+    </div>
+    <button class="btn-p"><i class="ti ti-plus" style="font-size:12px;vertical-align:-1px"></i> 顧客追加</button>
+  </div>
+  <div class="card" style="padding:0">
+    <table><thead><tr><th>会社名</th><th>担当者</th><th>業種</th><th>ステータス</th><th>売上累計</th><th>最終活動</th></tr></thead>
+    <tbody>${[['株式会社テクノ・ソリューションズ','山田 太郎','SaaS','取引中','¥18.4M','3日前'],['フューチャーIT株式会社','鈴木 花子','ITコンサル','取引中','¥12.1M','1週間前'],['グローバルシステムズ','佐藤 一郎','SI','見込み','¥0','2週間前'],['デジタルコア株式会社','田中 美咲','SaaS','取引中','¥5.2M','昨日'],['ネクストテック株式会社','伊藤 健太','クラウド','リード','¥0','今日']].map(([name,person,industry,status,sales,last])=>`
+      <tr style="cursor:pointer">
+        <td style="font-weight:500">${name}</td><td>${person}</td><td style="color:var(--text-secondary)">${industry}</td>
+        <td><span class="badge ${status==='取引中'?'b-won':status==='見込み'?'b-prop':'b-new'}">${status}</span></td>
+        <td style="font-weight:500">${sales}</td><td style="color:var(--text-secondary)">${last}</td>
+      </tr>`).join('')}</tbody></table></div>`}},
+
+deals:{title:'商談管理',render(){return`
+  <div class="sh">
+    <div style="display:flex;gap:8px;align-items:center">
+      <input type="text" placeholder="商談名・顧客を検索..." style="width:200px;font-size:12px;padding:4px 9px">
+      <select style="font-size:12px;padding:4px 7px"><option>すべてのステータス</option><option>提案中</option><option>交渉中</option></select>
+    </div>
+    <button class="btn-p"><i class="ti ti-plus" style="font-size:12px;vertical-align:-1px"></i> 商談追加</button>
+  </div>
+  <div class="card" style="padding:0">
+    <table><thead><tr><th>商談名</th><th>顧客</th><th>担当</th><th>金額</th><th>ステータス</th><th>期日</th></tr></thead>
+    <tbody>${[['CRM導入支援','テクノ・ソリューションズ','山田','¥5,200,000','交渉中','06/30'],['クラウド移行PJ','フューチャーIT','鈴木','¥18,000,000','提案中','07/15'],['データ分析基盤','グローバルシステムズ','佐藤','¥12,000,000','提案中','08/01'],['セキュリティ監査','デジタルコア','田中','¥3,500,000','新規接触','08/31'],['AI開発支援','ネクストテック','伊藤','¥25,000,000','提案中','09/30']].map(([deal,co,person,amt,status,date])=>`
+      <tr><td style="font-weight:500">${deal}</td><td style="color:var(--text-secondary)">${co}</td><td style="color:var(--text-secondary)">${person}</td>
+      <td>${amt}</td><td><span class="badge ${status==='交渉中'?'b-nego':status==='提案中'?'b-prop':'b-new'}">${status}</span></td>
+      <td style="color:var(--text-secondary)">${date}</td></tr>`).join('')}</tbody></table></div>`}},
+
+tasks:{title:'タスク管理',render(){return`
+  <div class="sh"><span class="st">今週のタスク</span><button class="btn-p"><i class="ti ti-plus" style="font-size:12px;vertical-align:-1px"></i> タスク追加</button></div>
+  <div class="card" style="padding:0">
+    <table><thead><tr><th style="width:28px"></th><th>タスク</th><th>関連顧客</th><th>期限</th><th>優先度</th></tr></thead>
+    <tbody>${[[true,'提案書の最終確認','テクノ・ソリューションズ','今日','高'],[false,'フォローアップメール送付','フューチャーIT','明日','中'],[false,'請求書INV-041の確認','フューチャーIT','6/28','高'],[true,'契約書レビュー依頼','デジタルコア','6/29','低'],[false,'入金消込処理','グローバルSys','6/30','中']].map(([done,task,co,due,pri])=>`
+      <tr><td><i class="ti ${done?'ti-circle-check':'ti-circle'}" style="font-size:15px;color:${done?'#1D9E75':'var(--text-tertiary)'}"></i></td>
+      <td style="${done?'text-decoration:line-through;color:var(--text-tertiary)':''}">${task}</td>
+      <td style="color:var(--text-secondary)">${co}</td>
+      <td style="color:${due==='今日'?'#993C1D':'var(--text-secondary)'};font-weight:${due==='今日'?'500':'400'}">${due}</td>
+      <td><span class="badge ${pri==='高'?'b-lost':pri==='中'?'b-nego':'b-new'}">${pri}</span></td></tr>`).join('')}</tbody></table></div>`}},
+
+invoices:{title:'請求書管理（インボイス対応）',render(){return`
+  <div class="sh">
+    <div style="display:flex;gap:8px;align-items:center">
+      <input type="text" placeholder="請求書番号・顧客を検索..." style="width:200px;font-size:12px;padding:4px 9px">
+      <select style="font-size:12px;padding:4px 7px"><option>すべて</option><option>未払い</option><option>消込済</option></select>
+    </div>
+    <div style="display:flex;gap:6px">
+      <button class="btn-sm"><i class="ti ti-download" style="font-size:12px;vertical-align:-1px"></i> CSV</button>
+      <button class="btn-sm" onclick="show('checkout')"><i class="ti ti-link" style="font-size:12px;vertical-align:-1px"></i> 決済リンク送付</button>
+      <button class="btn-p"><i class="ti ti-plus" style="font-size:12px;vertical-align:-1px"></i> 請求書作成</button>
+    </div>
+  </div>
+  <div class="card" style="padding:0;margin-bottom:14px">
+    <table><thead><tr><th>請求書番号</th><th>顧客</th><th>発行日</th><th>支払期限</th><th>税抜金額</th><th>消費税</th><th>合計</th><th>ステータス</th><th></th></tr></thead>
+    <tbody>${[['INV-2026-042','テクノ・ソリューションズ','06/01','06/30','¥4,727,272','¥472,728（10%）','¥5,200,000','b-paid','消込済'],['INV-2026-041','フューチャーIT','06/05','07/05','¥3,454,545','¥345,455（10%）','¥3,800,000','b-unpaid','未払い'],['INV-2026-040','グローバルSys','05/20','06/20','¥1,909,090','¥190,910（10%）','¥2,100,000','b-partial','一部消込'],['INV-2026-039','デジタルコア','05/15','06/15','¥1,363,636','¥136,364（10%）','¥1,500,000','b-unpaid','未払い']].map(([no,co,issued,due,net,tax,total,cls,status])=>`
+      <tr style="cursor:pointer">
+        <td style="font-weight:500;color:#534AB7">${no}</td><td>${co}</td>
+        <td style="color:var(--text-secondary)">${issued}</td><td style="color:var(--text-secondary)">${due}</td>
+        <td>${net}</td><td style="color:var(--text-secondary);font-size:11px">${tax}</td>
+        <td style="font-weight:500">${total}</td>
+        <td><span class="badge ${cls}">${status}</span></td>
+        <td><i class="ti ti-download" style="font-size:13px;color:var(--text-tertiary)"></i></td>
+      </tr>`).join('')}</tbody></table>
+  </div>
+  <div class="card" style="background:var(--bg-secondary)">
+    <div style="font-size:11px;font-weight:500;color:var(--text-secondary);margin-bottom:8px">インボイス登録番号：T1234567890123　（適格請求書発行事業者）</div>
+    <div style="display:flex;gap:24px">
+      ${[['請求総額','¥12,600,000'],['消込済','¥5,200,000'],['未収入金','¥7,400,000']].map(([l,v])=>`
+        <div><div style="font-size:11px;color:var(--text-secondary)">${l}</div><div style="font-size:16px;font-weight:500">${v}</div></div>`).join('')}
+    </div>
+  </div>`}},
+
+orders:{title:'受注管理',render(){return`
+  <div class="sh">
+    <div style="display:flex;gap:8px;align-items:center">
+      <input type="text" placeholder="受注番号・顧客を検索..." style="width:200px;font-size:12px;padding:4px 9px">
+      <select style="font-size:12px;padding:4px 7px"><option>すべて</option><option>受注確定</option><option>納品済</option></select>
+    </div>
+    <button class="btn-p"><i class="ti ti-plus" style="font-size:12px;vertical-align:-1px"></i> 受注登録</button>
+  </div>
+  <div class="card" style="padding:0">
+    <table><thead><tr><th>受注番号</th><th>顧客</th><th>件名</th><th>受注日</th><th>納期</th><th>金額</th><th>進捗</th><th>請求書</th></tr></thead>
+    <tbody>${[['ORD-2026-018','テクノ・ソリューションズ','CRM導入支援','06/01','06/30','¥5,200,000','b-won','納品済','INV-2026-042'],['ORD-2026-017','フューチャーIT','クラウド移行PJ','05/20','07/31','¥18,000,000','b-prop','進行中','INV-2026-041'],['ORD-2026-016','グローバルSys','データ基盤構築','05/10','08/31','¥12,000,000','b-nego','進行中','INV-2026-040'],['ORD-2026-015','デジタルコア','セキュリティ監査','04/15','06/15','¥3,500,000','b-won','納品済','INV-2026-039']].map(([no,co,name,date,due,amt,cls,prog,inv])=>`
+      <tr style="cursor:pointer">
+        <td style="font-weight:500;color:#534AB7">${no}</td><td>${co}</td><td>${name}</td>
+        <td style="color:var(--text-secondary)">${date}</td><td style="color:var(--text-secondary)">${due}</td>
+        <td style="font-weight:500">${amt}</td>
+        <td><span class="badge ${cls}">${prog}</span></td>
+        <td style="font-size:11px;color:#534AB7">${inv}</td>
+      </tr>`).join('')}</tbody></table></div>`}},
+
+purchases:{title:'発注・仕入管理',render(){return`
+  <div class="sh">
+    <div style="display:flex;gap:8px;align-items:center">
+      <input type="text" placeholder="発注番号・仕入先を検索..." style="width:200px;font-size:12px;padding:4px 9px">
+      <select style="font-size:12px;padding:4px 7px"><option>すべて</option><option>発注済</option><option>入荷済</option></select>
+    </div>
+    <button class="btn-p"><i class="ti ti-plus" style="font-size:12px;vertical-align:-1px"></i> 発注登録</button>
+  </div>
+  <div class="card" style="padding:0;margin-bottom:14px">
+    <table><thead><tr><th>発注番号</th><th>仕入先</th><th>品目</th><th>発注日</th><th>入荷予定</th><th>金額</th><th>入荷</th><th>支払</th></tr></thead>
+    <tbody>${[['PO-2026-021','AWS Japan','クラウドサーバー費用','06/01','06/30','¥320,000','b-won','入荷済','b-unpaid','未払'],['PO-2026-020','外注先A社','開発委託費','05/25','06/25','¥2,200,000','b-won','入荷済','b-paid','支払済'],['PO-2026-019','デザイン会社B','UI/UX制作','05/20','07/10','¥550,000','b-prop','入荷待ち','b-pending','未発生'],['PO-2026-018','SaaS Tool社','ライセンス費','05/01','05/31','¥85,000','b-won','入荷済','b-paid','支払済']].map(([no,vendor,item,date,due,amt,scls,stage,pcls,pay])=>`
+      <tr style="cursor:pointer">
+        <td style="font-weight:500;color:#534AB7">${no}</td><td>${vendor}</td><td>${item}</td>
+        <td style="color:var(--text-secondary)">${date}</td><td style="color:var(--text-secondary)">${due}</td>
+        <td style="font-weight:500">${amt}</td>
+        <td><span class="badge ${scls}">${stage}</span></td>
+        <td><span class="badge ${pcls}">${pay}</span></td>
+      </tr>`).join('')}</tbody></table>
+  </div>
+  <div class="two-col">
+    <div class="card" style="background:var(--bg-secondary)">
+      <div style="font-size:11px;font-weight:500;color:var(--text-secondary);margin-bottom:8px">今月の買掛サマリ</div>
+      ${[['発注総額','¥3,155,000'],['支払済','¥2,285,000'],['未払残高','¥870,000']].map(([l,v])=>`
+        <div class="sum-row"><span style="color:var(--text-secondary)">${l}</span><span>${v}</span></div>`).join('')}
+    </div>
+    <div class="card" style="background:var(--bg-secondary)">
+      <div style="font-size:11px;font-weight:500;color:var(--text-secondary);margin-bottom:8px">支払期限アラート</div>
+      ${[['AWS Japan','¥320,000','06/28','b-unpaid'],['デザイン会社B','¥550,000','07/02','b-pending']].map(([v,a,d,c])=>`
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:4px 0;border-bottom:0.5px solid var(--border-tertiary)">
+          <div><div style="font-size:11px">${v}</div><div style="font-size:10px;color:var(--text-tertiary)">期限 ${d}</div></div>
+          <span class="badge ${c}">${a}</span>
+        </div>`).join('')}
+    </div>
+  </div>`}},
+
+payments:{title:'入金管理',render(){return`
+  <div class="sh">
+    <div style="display:flex;gap:8px;align-items:center">
+      <input type="text" placeholder="顧客・請求書番号を検索..." style="width:200px;font-size:12px;padding:4px 9px">
+      <select style="font-size:12px;padding:4px 7px"><option>すべて</option><option>未消込</option><option>消込済</option></select>
+    </div>
+    <button class="btn-g"><i class="ti ti-check" style="font-size:12px;vertical-align:-1px"></i> 消込処理</button>
+  </div>
+  <div class="card" style="padding:0;margin-bottom:14px">
+    <table><thead><tr><th>入金日</th><th>顧客</th><th>請求書番号</th><th>請求額</th><th>入金額</th><th>差額</th><th>消込状態</th><th>入金方法</th></tr></thead>
+    <tbody>${[['06/25','テクノ・ソリューションズ','INV-2026-042','¥5,200,000','¥5,200,000','¥0','b-paid','消込済','銀行振込'],['06/20','グローバルSys','INV-2026-040','¥2,100,000','¥1,000,000','▲¥1,100,000','b-partial','一部消込','銀行振込'],['—','フューチャーIT','INV-2026-041','¥3,800,000','—','—','b-unpaid','未消込','—'],['—','デジタルコア','INV-2026-039','¥1,500,000','—','—','b-unpaid','未消込','—']].map(([date,co,inv,billed,paid,diff,cls,status,method])=>`
+      <tr style="cursor:pointer">
+        <td style="color:var(--text-secondary)">${date}</td><td style="font-weight:500">${co}</td>
+        <td style="font-size:11px;color:#534AB7">${inv}</td>
+        <td>${billed}</td><td style="font-weight:500">${paid}</td>
+        <td style="color:${diff.startsWith('▲')?'#993C1D':'var(--text-secondary)'};font-size:11px">${diff}</td>
+        <td><span class="badge ${cls}">${status}</span></td>
+        <td style="color:var(--text-secondary);font-size:11px">${method}</td>
+      </tr>`).join('')}</tbody></table>
+  </div>
+  <div class="three-col">
+    ${[['入金済合計','¥6,200,000','b-paid'],['未収入金','¥5,300,000','b-unpaid'],['一部消込','¥1,100,000','b-partial']].map(([l,v,c])=>`
+      <div class="card" style="background:var(--bg-secondary)">
+        <div style="font-size:11px;color:var(--text-secondary);margin-bottom:6px">${l}</div>
+        <div style="display:flex;align-items:center;justify-content:space-between">
+          <span style="font-size:18px;font-weight:500">${v}</span>
+          <span class="badge ${c}">${l}</span>
+        </div>
+      </div>`).join('')}
+  </div>`}},
+
+expenses:{title:'支払管理',render(){return`
+  <div class="sh">
+    <div style="display:flex;gap:8px;align-items:center">
+      <input type="text" placeholder="仕入先・発注番号を検索..." style="width:200px;font-size:12px;padding:4px 9px">
+      <select style="font-size:12px;padding:4px 7px"><option>すべて</option><option>未払い</option><option>支払済</option></select>
+    </div>
+    <button class="btn-g"><i class="ti ti-check" style="font-size:12px;vertical-align:-1px"></i> 支払処理</button>
+  </div>
+  <div class="card" style="padding:0;margin-bottom:14px">
+    <table><thead><tr><th>支払日</th><th>仕入先</th><th>発注番号</th><th>支払額</th><th>支払方法</th><th>ステータス</th></tr></thead>
+    <tbody>${[['06/20','外注先A社','PO-2026-020','¥2,200,000','銀行振込','b-paid','支払済'],['05/31','SaaS Tool社','PO-2026-018','¥85,000','クレジットカード','b-paid','支払済'],['06/28','AWS Japan','PO-2026-021','¥320,000','クレジットカード','b-unpaid','未払い'],['07/02','デザイン会社B','PO-2026-019','¥550,000','銀行振込','b-pending','予定']].map(([date,vendor,po,amt,method,cls,status])=>`
+      <tr style="cursor:pointer">
+        <td style="color:var(--text-secondary)">${date}</td><td style="font-weight:500">${vendor}</td>
+        <td style="font-size:11px;color:#534AB7">${po}</td>
+        <td style="font-weight:500">${amt}</td>
+        <td style="color:var(--text-secondary);font-size:11px">${method}</td>
+        <td><span class="badge ${cls}">${status}</span></td>
+      </tr>`).join('')}</tbody></table>
+  </div>
+  <div class="two-col">
+    <div class="card" style="background:var(--bg-secondary)">
+      <div style="font-size:11px;font-weight:500;color:var(--text-secondary);margin-bottom:8px">支払サマリ（今月）</div>
+      ${[['支払済','¥2,285,000'],['未払（期限内）','¥320,000'],['未払（要対応）','¥550,000'],['合計','¥3,155,000']].map(([l,v])=>`
+        <div class="sum-row"><span style="color:var(--text-secondary)">${l}</span><span>${v}</span></div>`).join('')}
+    </div>
+    <div class="card" style="background:var(--bg-secondary)">
+      <div style="font-size:11px;font-weight:500;color:var(--text-secondary);margin-bottom:8px">支払方法内訳</div>
+      ${[['銀行振込','¥2,750,000','72%'],['クレジットカード','¥405,000','13%'],['その他','¥0','0%']].map(([m,a,p])=>`
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:4px 0;border-bottom:0.5px solid var(--border-tertiary)">
+          <span style="font-size:11px">${m}</span>
+          <div style="display:flex;align-items:center;gap:8px"><span style="font-size:11px">${a}</span><span style="font-size:10px;color:var(--text-tertiary)">${p}</span></div>
+        </div>`).join('')}
+    </div>
+  </div>`}},
+
+checkout:{title:'決済画面（顧客向け）— INV-2026-041',render(){return`
+  <div style="display:flex;gap:0;border:0.5px solid var(--border-tertiary);border-radius:var(--radius-lg);overflow:hidden;background:var(--bg-primary)">
+
+    <!-- 左：決済フォーム -->
+    <div style="flex:1;padding:28px 32px;border-right:0.5px solid var(--border-tertiary);background:var(--bg-primary)">
+      <div style="font-size:12px;font-weight:500;color:var(--text-secondary);margin-bottom:20px;display:flex;align-items:center;gap:6px">
+        <i class="ti ti-building-skyscraper" style="font-size:15px;color:#534AB7"></i>MeilleureVieSales
+      </div>
+
+      <!-- かんたん決済 -->
+      <div style="font-size:12px;font-weight:500;color:var(--text-primary);margin-bottom:4px">かんたん決済</div>
+      <div style="font-size:10px;color:var(--text-tertiary);margin-bottom:12px;display:flex;align-items:center;gap:3px">
+        <i class="ti ti-lock" style="font-size:11px"></i>すべての取引は安全で、暗号化されています。
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px">
+        <div style="border:0.5px solid var(--border-secondary);border-radius:var(--radius-md);padding:8px 0;display:flex;align-items:center;justify-content:center;cursor:pointer;background:#5433FF;color:#fff;font-size:12px;font-weight:500;gap:5px">
+          <i class="ti ti-credit-card"></i> Shop Pay
+        </div>
+        <div style="border:0.5px solid var(--border-secondary);border-radius:var(--radius-md);padding:8px 0;display:flex;align-items:center;justify-content:center;cursor:pointer;background:#000;color:#fff;font-size:12px;gap:4px">
+          <span style="color:#4285F4;font-weight:700">G</span><span>Pay</span>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;font-size:11px;color:var(--text-tertiary)">
+        <div style="flex:1;height:0.5px;background:var(--border-tertiary)"></div>または<div style="flex:1;height:0.5px;background:var(--border-tertiary)"></div>
+      </div>
+
+      <!-- メール -->
+      <div style="margin-bottom:9px">
+        <div style="font-size:10px;color:var(--text-secondary);margin-bottom:3px">メールアドレス（請求書送付先）</div>
+        <input type="email" value="suzuki@future-it.co.jp" style="width:100%;font-size:12px;padding:7px 9px">
+      </div>
+      <div style="display:flex;align-items:center;gap:5px;margin-bottom:12px">
+        <input type="checkbox" style="width:12px;height:12px;accent-color:#534AB7">
+        <span style="font-size:11px;color:var(--text-secondary)">お得な情報をメールで受け取る</span>
+      </div>
+
+      <!-- 支払方法 -->
+      <div style="font-size:12px;font-weight:500;color:var(--text-primary);margin-bottom:9px">お支払い方法</div>
+      <div style="border:0.5px solid var(--border-secondary);border-radius:var(--radius-md);overflow:hidden;margin-bottom:12px">
+
+        <!-- クレジットカード -->
+        <div id="opt-card" style="padding:10px 11px;display:flex;align-items:center;gap:9px;cursor:pointer;background:#EEEDFE;border-bottom:0.5px solid var(--border-tertiary)" onclick="selPay('card')">
+          <input type="radio" name="pay" checked style="accent-color:#534AB7;width:13px;height:13px;flex-shrink:0">
+          <span style="font-size:12px;color:var(--text-primary);flex:1">クレジットカード</span>
+          <div style="display:flex;gap:3px;align-items:center">
+            <div style="width:28px;height:18px;border-radius:3px;border:0.5px solid var(--border-tertiary);background:#fff;display:flex;align-items:center;justify-content:center;font-size:7px;font-weight:700;color:#1a1f71">VISA</div>
+            <div style="width:28px;height:18px;border-radius:3px;background:#EB001B;display:flex;align-items:center;justify-content:center;font-size:7px;font-weight:700;color:#fff">MC</div>
+            <div style="width:28px;height:18px;border-radius:3px;background:#016fcf;display:flex;align-items:center;justify-content:center;font-size:7px;font-weight:700;color:#fff">AMEX</div>
+            <span style="font-size:10px;color:var(--text-tertiary)">+3</span>
+          </div>
+        </div>
+        <div id="card-fields" style="padding:9px 11px;background:var(--bg-secondary);border-bottom:0.5px solid var(--border-tertiary)">
+          <div style="position:relative;margin-bottom:7px">
+            <input type="text" placeholder="カード番号" style="width:100%;font-size:12px;padding:7px 32px 7px 9px" oninput="this.value=this.value.replace(/\D/g,'').slice(0,16).replace(/(.{4})/g,'$1 ').trim()">
+            <i class="ti ti-lock" style="position:absolute;right:9px;top:50%;transform:translateY(-50%);font-size:13px;color:var(--text-tertiary)"></i>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:7px">
+            <input type="text" placeholder="有効期限（月/年）" style="font-size:12px;padding:7px 9px" maxlength="5" oninput="let v=this.value.replace(/\D/g,'').slice(0,4);if(v.length>=3)v=v.slice(0,2)+'/'+v.slice(2);this.value=v">
+            <div style="position:relative">
+              <input type="text" placeholder="セキュリティコード" style="width:100%;font-size:12px;padding:7px 28px 7px 9px" maxlength="4">
+              <i class="ti ti-help" style="position:absolute;right:9px;top:50%;transform:translateY(-50%);font-size:13px;color:var(--text-tertiary)"></i>
+            </div>
+          </div>
+          <input type="text" placeholder="カードの名義人" style="width:100%;font-size:12px;padding:7px 9px;text-transform:uppercase">
+        </div>
+
+        <!-- PayPay -->
+        <div id="opt-pp" style="padding:10px 11px;display:flex;align-items:center;gap:9px;cursor:pointer;border-bottom:0.5px solid var(--border-tertiary)" onclick="selPay('pp')">
+          <input type="radio" name="pay" style="accent-color:#534AB7;width:13px;height:13px;flex-shrink:0">
+          <span style="font-size:12px;color:var(--text-primary);flex:1">PayPay</span>
+          <span style="font-size:13px;font-weight:700;color:#FF0033">P</span>
+        </div>
+        <div id="pp-fields" style="display:none;padding:9px 11px;background:var(--bg-secondary);font-size:11px;color:var(--text-secondary);border-bottom:0.5px solid var(--border-tertiary)">
+          「今すぐ支払う」ボタンを押すとPayPayアプリに移動します。
+        </div>
+
+        <!-- 銀行振込 -->
+        <div id="opt-bank" style="padding:10px 11px;display:flex;align-items:center;gap:9px;cursor:pointer" onclick="selPay('bank')">
+          <input type="radio" name="pay" style="accent-color:#534AB7;width:13px;height:13px;flex-shrink:0">
+          <span style="font-size:12px;color:var(--text-primary);flex:1">銀行振込</span>
+          <i class="ti ti-building-bank" style="font-size:15px;color:var(--text-tertiary)"></i>
+        </div>
+        <div id="bank-fields" style="display:none;padding:9px 11px;background:var(--bg-secondary);font-size:11px;color:var(--text-secondary)">
+          <div style="font-weight:500;color:var(--text-primary);margin-bottom:4px">振込先口座情報</div>
+          <div>銀行名：〇〇銀行　新宿支店 ／ 口座種別：普通 ／ 口座番号：1234567</div>
+          <div>口座名義：カ）〇〇〇〇</div>
+          <div style="margin-top:5px;color:var(--text-tertiary)">※振込手数料はご負担ください。入金確認後に領収書を発行します。</div>
+        </div>
+      </div>
+
+      <!-- 請求先住所 -->
+      <div style="font-size:12px;font-weight:500;color:var(--text-primary);margin-bottom:9px">請求先住所</div>
+      <div style="margin-bottom:7px">
+        <div style="font-size:10px;color:var(--text-secondary);margin-bottom:3px">会社名</div>
+        <input type="text" value="フューチャーIT株式会社" style="width:100%;font-size:12px;padding:7px 9px">
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:7px">
+        <div>
+          <div style="font-size:10px;color:var(--text-secondary);margin-bottom:3px">郵便番号</div>
+          <input type="text" placeholder="100-0001" style="width:100%;font-size:12px;padding:7px 9px">
+        </div>
+        <div>
+          <div style="font-size:10px;color:var(--text-secondary);margin-bottom:3px">都道府県</div>
+          <input type="text" placeholder="東京都" style="width:100%;font-size:12px;padding:7px 9px">
+        </div>
+      </div>
+      <div style="margin-bottom:14px">
+        <div style="font-size:10px;color:var(--text-secondary);margin-bottom:3px">住所</div>
+        <input type="text" placeholder="〇〇区〇〇 1-2-3" style="width:100%;font-size:12px;padding:7px 9px">
+      </div>
+
+      <!-- 支払いボタン -->
+      <button id="pay-btn" onclick="doPay()" style="width:100%;padding:11px;background:#534AB7;color:#fff;border:none;border-radius:var(--radius-md);font-size:13px;font-weight:500;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;font-family:inherit">
+        <i class="ti ti-lock"></i> 今すぐ支払う — ¥3,800,000
+      </button>
+      <div style="font-size:10px;color:var(--text-tertiary);text-align:center;margin-top:7px;display:flex;align-items:center;justify-content:center;gap:4px">
+        <i class="ti ti-shield-check" style="font-size:11px"></i>SSL暗号化通信で保護されています
+      </div>
+    </div>
+
+    <!-- 右：注文サマリー -->
+    <div style="width:280px;padding:28px 24px;background:var(--bg-secondary)">
+      <div style="font-size:11px;font-weight:500;color:var(--text-secondary);margin-bottom:12px;display:flex;align-items:center;gap:4px">
+        <i class="ti ti-file-invoice" style="font-size:13px;color:#534AB7"></i>請求書 INV-2026-041
+      </div>
+
+      <!-- 商品 -->
+      <div style="display:flex;align-items:flex-start;gap:9px;padding:9px 0;border-bottom:0.5px solid var(--border-tertiary)">
+        <div style="width:38px;height:38px;border-radius:6px;background:#EEEDFE;border:0.5px solid var(--border-tertiary);display:flex;align-items:center;justify-content:center;flex-shrink:0;position:relative">
+          <i class="ti ti-cpu" style="font-size:17px;color:#534AB7"></i>
+          <div style="position:absolute;top:-5px;right:-5px;width:15px;height:15px;border-radius:50%;background:#534AB7;color:#fff;font-size:9px;font-weight:500;display:flex;align-items:center;justify-content:center">1</div>
+        </div>
+        <div style="flex:1">
+          <div style="font-size:11px;font-weight:500;color:var(--text-primary)">クラウド移行PJサービス</div>
+          <div style="font-size:10px;color:var(--text-tertiary);margin-top:2px">フューチャーIT / 2026年6月分</div>
+        </div>
+        <div style="font-size:11px;font-weight:500;color:var(--text-primary)">¥3,454,545</div>
+      </div>
+
+      <!-- クーポン -->
+      <div style="display:flex;gap:5px;margin:10px 0">
+        <input id="coupon" type="text" placeholder="クーポンコード" style="flex:1;font-size:11px;padding:6px 8px">
+        <button onclick="applyCoupon()" style="padding:6px 10px;border:0.5px solid var(--border-secondary);border-radius:var(--radius-md);background:var(--bg-primary);font-size:11px;color:var(--text-primary);cursor:pointer;font-family:inherit">適用</button>
+      </div>
+      <div id="coupon-msg" style="font-size:10px;display:none;margin-bottom:6px"></div>
+
+      <div style="height:0.5px;background:var(--border-tertiary);margin-bottom:8px"></div>
+
+      <!-- 金額内訳 -->
+      <div style="display:flex;justify-content:space-between;font-size:11px;padding:3px 0;color:var(--text-secondary)"><span>小計（税抜）</span><span>¥3,454,545</span></div>
+      <div style="display:flex;justify-content:space-between;font-size:11px;padding:3px 0;color:var(--text-secondary)"><span>消費税（10%）</span><span>¥345,455</span></div>
+      <div id="discount-row" style="display:none;justify-content:space-between;font-size:11px;padding:3px 0;color:#0F6E56"><span>割引</span><span id="discount-amt"></span></div>
+      <div style="height:0.5px;background:var(--border-tertiary);margin:8px 0"></div>
+      <div style="display:flex;justify-content:space-between;font-size:13px;font-weight:500;color:var(--text-primary);padding:3px 0"><span>合計</span><span>¥3,800,000</span></div>
+      <div style="font-size:10px;color:var(--text-tertiary);margin-top:2px">¥345,455 の消費税（10%）を含む</div>
+
+      <!-- インボイス情報 -->
+      <div style="background:#EEEDFE;border:0.5px solid #AFA9EC;border-radius:var(--radius-md);padding:8px 10px;font-size:10px;color:#3C3489;margin-top:14px;line-height:1.7">
+        <div style="font-weight:500;margin-bottom:3px"><i class="ti ti-circle-check" style="font-size:11px"></i> 適格請求書（インボイス）対応</div>
+        <div>登録番号：T1234567890123</div>
+        <div>取引内容：クラウド移行PJサービス</div>
+        <div>税率：10% ／ 消費税額：¥345,455</div>
+        <div style="margin-top:3px;color:#534AB7">支払い完了後に適格請求書PDFを発行します。</div>
+      </div>
+
+      <!-- ルート①の説明 -->
+      <div style="margin-top:12px;font-size:10px;color:var(--text-tertiary);line-height:1.6">
+        <i class="ti ti-info-circle" style="font-size:11px;vertical-align:-1px"></i>
+        この画面は<strong style="color:var(--text-secondary)">請求書管理</strong>の「決済リンク送付」から遷移します（ルート①）。
+        支払い完了後、入金管理画面で自動消込処理が行われます。
+      </div>
+    </div>
+  </div>
+
+  <script>
+  function selPay(type){
+    ['card','pp','bank'].forEach(t=>{
+      document.getElementById('opt-'+t).style.background='';
+      const f=document.getElementById(t===\'card\'?\'card-fields\':t+\'-fields\');
+      if(f) f.style.display=\'none\';
+    });
+    document.getElementById(\'opt-\'+type).style.background=\'#EEEDFE\';
+    const fields=document.getElementById(type===\'card\'?\'card-fields\':type+\'-fields\');
+    if(fields) fields.style.display=\'block\';
+    document.querySelectorAll(\'[name=pay]\')[{card:0,pp:1,bank:2}[type]].checked=true;
+  }
+  function applyCoupon(){
+    const code=document.getElementById(\'coupon\').value.trim();
+    const msg=document.getElementById(\'coupon-msg\');
+    const row=document.getElementById(\'discount-row\');
+    msg.style.display=\'block\';
+    if(code.toUpperCase()===\'SALES10\'){
+      msg.style.color=\'#0F6E56\'; msg.textContent=\'クーポン適用：10%割引\';
+      row.style.display=\'flex\';
+      document.getElementById(\'discount-amt\').textContent=\'−¥380,000\';
+    } else if(!code){
+      msg.style.color=\'#993C1D\'; msg.textContent=\'コードを入力してください\';
+      row.style.display=\'none\';
+    } else {
+      msg.style.color=\'#993C1D\'; msg.textContent=\'このクーポンコードは無効です\';
+      row.style.display=\'none\';
+    }
+  }
+  function doPay(){
+    const btn=document.getElementById(\'pay-btn\');
+    btn.innerHTML=\'処理中...\'; btn.disabled=true; btn.style.opacity=\'0.7\';
+    setTimeout(()=>{
+      btn.innerHTML=\'<i class="ti ti-circle-check"></i> 支払い完了 — 領収書を送信しました\';
+      btn.style.background=\'#1D9E75\'; btn.style.opacity=\'1\';
+    },1800);
+  }
+  <\/script>
+`}},
+
+ai:{title:'AI営業支援',render(){return`
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px">
+    ${[['ti-file-text','AI提案書生成','顧客情報・商談内容から提案書初稿を自動生成'],['ti-mail','AI営業メール','状況に応じた最適なアプローチメールを生成'],['ti-notes','AI顧客分析・商談要約・次回提案','顧客データを分析して商談内容を自動要約・次アクション提案']].map(([icon,title,desc])=>`
+      <div class="card" style="opacity:.8">
+        <div style="display:flex;align-items:center;gap:9px;margin-bottom:8px">
+          <i class="ti ${icon}" style="font-size:20px;color:#534AB7"></i>
+          <span style="font-size:13px;font-weight:500">${title}</span>
+        </div>
+        <div style="font-size:12px;color:var(--text-secondary)">${desc}</div>
+      </div>`).join('')}
+  </div>
+  <div class="card" style="border:0.5px solid #AFA9EC">
+    <div style="font-size:13px;font-weight:500;color:#3C3489;margin-bottom:10px"><i class="ti ti-sparkles" style="font-size:13px;vertical-align:-2px"></i> AI提案書生成</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
+      <div><div style="font-size:11px;color:var(--text-secondary);margin-bottom:3px">対象顧客</div>
+        <select style="width:100%;font-size:12px;padding:5px 7px"><option>株式会社テクノ・ソリューションズ</option></select></div>
+      <div><div style="font-size:11px;color:var(--text-secondary);margin-bottom:3px">商談</div>
+        <select style="width:100%;font-size:12px;padding:5px 7px"><option>CRM導入支援</option></select></div>
+    </div>
+    <textarea style="width:100%;font-size:12px;padding:7px;height:60px;resize:none" placeholder="例：ROI重視、競合はSalesforce、意思決定者はCTO..."></textarea>
+    <div style="margin-top:10px"><button class="btn-p"><i class="ti ti-sparkles" style="font-size:11px;vertical-align:-1px"></i> 提案書を生成する</button></div>
+  </div>`}}
+};
+
+function show(id){
+  const page=pages[id]||pages.dashboard;
+  document.getElementById('page-title').textContent=page.title;
+  document.getElementById('page-content').innerHTML=page.render();
+  document.querySelectorAll('.nav-item').forEach(el=>el.classList.remove('active'));
+  const map={dashboard:0,customers:1,deals:2,tasks:3,ai:4,invoices:5,orders:6,purchases:7,payments:8,expenses:9,checkout:10};
+  const items=document.querySelectorAll('.nav-item');
+  if(map[id]!==undefined) items[map[id]]?.classList.add('active');
+}
+show('dashboard');
+</script>
+</body>
+</html>
