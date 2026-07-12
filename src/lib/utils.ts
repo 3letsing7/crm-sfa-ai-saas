@@ -21,3 +21,15 @@ export function formatDate(date: string | Date | null | undefined) {
     day: "2-digit",
   }).format(d);
 }
+
+export const PAYMENT_METHOD_LABEL: Record<string, string> = {
+  bank_transfer: "銀行振込",
+  credit_card: "クレジットカード",
+  cash: "現金",
+  other: "その他",
+};
+
+export function formatPaymentMethod(method: string | null | undefined) {
+  if (!method) return "-";
+  return PAYMENT_METHOD_LABEL[method] ?? method;
+}

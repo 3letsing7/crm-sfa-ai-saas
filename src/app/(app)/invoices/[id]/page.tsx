@@ -16,7 +16,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { formatCurrency, formatDate } from "@/lib/utils";
+import { formatCurrency, formatDate, formatPaymentMethod } from "@/lib/utils";
 import type { InvoiceStatus } from "@/lib/supabase/types";
 
 const STATUS_LABEL: Record<InvoiceStatus, string> = {
@@ -159,7 +159,7 @@ export default async function InvoiceDetailPage({
                     <span>{formatCurrency(p.paid_amount)}</span>
                     <span className="text-xs text-muted-foreground">{formatDate(p.paid_at)}</span>
                   </div>
-                  <p className="text-xs text-muted-foreground">{p.method}</p>
+                  <p className="text-xs text-muted-foreground">{formatPaymentMethod(p.method)}</p>
                 </div>
               ))
             ) : (

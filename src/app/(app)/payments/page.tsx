@@ -11,7 +11,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { formatCurrency, formatDate } from "@/lib/utils";
+import { formatCurrency, formatDate, formatPaymentMethod } from "@/lib/utils";
 import type { PaymentMatchStatus } from "@/lib/supabase/types";
 
 const MATCH_LABEL: Record<PaymentMatchStatus, string> = {
@@ -69,7 +69,7 @@ export default async function PaymentsPage() {
                   {(payment.invoices as { invoice_no?: string } | null)?.invoice_no ?? "-"}
                 </TableCell>
                 <TableCell>{formatCurrency(payment.paid_amount ?? 0)}</TableCell>
-                <TableCell>{payment.method ?? "-"}</TableCell>
+                <TableCell>{formatPaymentMethod(payment.method)}</TableCell>
                 <TableCell>
                   <Badge variant={MATCH_VARIANT[payment.match_status as PaymentMatchStatus]}>
                     {MATCH_LABEL[payment.match_status as PaymentMatchStatus]}
