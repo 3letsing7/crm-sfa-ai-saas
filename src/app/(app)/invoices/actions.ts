@@ -89,6 +89,75 @@ export async function createInvoice(formData: FormData) {
   redirect(`/invoices/${invoice!.id}`);
 }
 
+export async function updateInvoice(id: string, formData: FormData) {
+  const supabase = await createClient();
+
+  const { data: existing } = await supabase.from("invoices").select("status").eq("id", id).single();
+  if (!existing || existing.status !== "draft") {
+    redirect(`/invoices/${id}?error=${encodeURIComponent("下書き状態の請求書のみ編集できます")}`);
+  }
+
+  const customerId = String(formData.get("customer_id") ?? "");
+  const dealId = String(formData.get("deal_id") ?? "") || null;
+  const dueDate = String(formData.get("due_date") ?? "") || null;
+  const invoiceNumberT = String(formData.get("invoice_number_t") ?? "") || null;
+  const taxRate = Number(formData.get("tax_rate") ?? 10);
+
+  const itemsRaw = String(formData.get("items_json") ?? "[]");
+  let items: InvoiceItemInput[] = [];
+  try {
+    items = JSON.parse(itemsRaw);
+  } catch {
+    items = [];
+  }
+  items = items.filter((i) => i.name && i.quantity > 0);
+
+  if (items.length === 0) {
+    redirect(`/invoices/${id}/edit?error=${encodeURIComponent("明細を1件以上入力してください")}`);
+  }
+
+  const subtotal = items.reduce((sum, i) => sum + i.quantity * i.unit_price, 0);
+  const taxAmount = Math.round(subtotal * (taxRate / 100));
+  const total = subtotal + taxAmount;
+
+  const { error } = await supabase
+    .from("invoices")
+    .update({
+      customer_id: customerId,
+      deal_id: dealId,
+      due_date: dueDate,
+      subtotal,
+      tax_rate: taxRate,
+      tax_amount: taxAmount,
+      total,
+      invoice_number_t: invoiceNumberT,
+    })
+    .eq("id", id);
+
+  if (error) {
+    redirect(`/invoices/${id}/edit?error=${encodeURIComponent(error.message)}`);
+  }
+
+  await supabase.from("invoice_items").delete().eq("invoice_id", id);
+  const { error: itemsError } = await supabase.from("invoice_items").insert(
+    items.map((i) => ({
+      invoice_id: id,
+      name: i.name,
+      quantity: i.quantity,
+      unit_price: i.unit_price,
+      amount: i.quantity * i.unit_price,
+    }))
+  );
+
+  if (itemsError) {
+    redirect(`/invoices/${id}/edit?error=${encodeURIComponent(itemsError.message)}`);
+  }
+
+  revalidatePath("/invoices");
+  revalidatePath(`/invoices/${id}`);
+  redirect(`/invoices/${id}`);
+}
+
 export async function updateInvoiceStatus(id: string, status: string) {
   const supabase = await createClient();
   await supabase.from("invoices").update({ status }).eq("id", id);

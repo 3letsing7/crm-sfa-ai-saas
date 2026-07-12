@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { Plus } from "lucide-react";
+import { Plus, Pencil } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { deleteInvoice } from "@/app/(app)/invoices/actions";
 import { InvoiceStatusActions } from "@/components/invoices/invoice-status-actions";
@@ -35,8 +35,15 @@ const STATUS_VARIANT: Record<InvoiceStatus, "default" | "success" | "destructive
   void: "outline",
 };
 
-export default async function InvoiceDetailPage({ params }: { params: Promise<{ id: string }> }) {
+export default async function InvoiceDetailPage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ id: string }>;
+  searchParams: Promise<{ error?: string }>;
+}) {
   const { id } = await params;
+  const { error } = await searchParams;
   const supabase = await createClient();
 
   const [{ data: invoice }, { data: items }, { data: payments }] = await Promise.all([
@@ -53,6 +60,9 @@ export default async function InvoiceDetailPage({ params }: { params: Promise<{ 
 
   return (
     <div className="space-y-6">
+      {error && (
+        <p className="rounded-md bg-destructive/10 px-3 py-2 text-sm text-destructive">{error}</p>
+      )}
       <div className="flex items-start justify-between">
         <div>
           <h1 className="text-xl font-semibold">{invoice.invoice_no}</h1>
@@ -62,6 +72,14 @@ export default async function InvoiceDetailPage({ params }: { params: Promise<{ 
         </div>
         <div className="flex items-center gap-2">
           <Badge variant={STATUS_VARIANT[status]}>{STATUS_LABEL[status]}</Badge>
+          {status === "draft" && (
+            <Button asChild size="sm" variant="outline">
+              <Link href={`/invoices/${id}/edit`}>
+                <Pencil />
+                編集
+              </Link>
+            </Button>
+          )}
           <InvoiceStatusActions id={id} status={status} />
           <DeleteButton action={boundDelete} />
         </div>

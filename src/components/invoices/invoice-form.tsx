@@ -16,14 +16,28 @@ export function InvoiceForm({
   customers,
   deals,
   error,
+  defaultValues,
+  defaultItems,
+  submitLabel = "請求書を作成",
 }: {
   action: (formData: FormData) => void;
   customers: Option[];
   deals: Option[];
   error?: string;
+  defaultValues?: {
+    customer_id?: string;
+    deal_id?: string | null;
+    due_date?: string | null;
+    invoice_number_t?: string | null;
+    tax_rate?: number;
+  };
+  defaultItems?: Item[];
+  submitLabel?: string;
 }) {
-  const [items, setItems] = useState<Item[]>([{ name: "", quantity: 1, unit_price: 0 }]);
-  const [taxRate, setTaxRate] = useState(10);
+  const [items, setItems] = useState<Item[]>(
+    defaultItems && defaultItems.length > 0 ? defaultItems : [{ name: "", quantity: 1, unit_price: 0 }]
+  );
+  const [taxRate, setTaxRate] = useState(defaultValues?.tax_rate ?? 10);
 
   const subtotal = useMemo(
     () => items.reduce((sum, i) => sum + (i.quantity || 0) * (i.unit_price || 0), 0),
@@ -52,7 +66,7 @@ export function InvoiceForm({
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div className="space-y-1.5">
           <Label htmlFor="customer_id">顧客 *</Label>
-          <Select id="customer_id" name="customer_id" required defaultValue="">
+          <Select id="customer_id" name="customer_id" required defaultValue={defaultValues?.customer_id ?? ""}>
             <option value="" disabled>
               顧客を選択
             </option>
@@ -66,7 +80,7 @@ export function InvoiceForm({
 
         <div className="space-y-1.5">
           <Label htmlFor="deal_id">関連する商談(任意)</Label>
-          <Select id="deal_id" name="deal_id" defaultValue="">
+          <Select id="deal_id" name="deal_id" defaultValue={defaultValues?.deal_id ?? ""}>
             <option value="">なし</option>
             {deals.map((d) => (
               <option key={d.id} value={d.id}>
@@ -78,12 +92,17 @@ export function InvoiceForm({
 
         <div className="space-y-1.5">
           <Label htmlFor="due_date">支払期限</Label>
-          <Input id="due_date" name="due_date" type="date" />
+          <Input id="due_date" name="due_date" type="date" defaultValue={defaultValues?.due_date ?? ""} />
         </div>
 
         <div className="space-y-1.5">
           <Label htmlFor="invoice_number_t">適格請求書発行事業者登録番号</Label>
-          <Input id="invoice_number_t" name="invoice_number_t" placeholder="T1234567890123" />
+          <Input
+            id="invoice_number_t"
+            name="invoice_number_t"
+            placeholder="T1234567890123"
+            defaultValue={defaultValues?.invoice_number_t ?? ""}
+          />
         </div>
       </div>
 
@@ -173,7 +192,7 @@ export function InvoiceForm({
 
       {error && <p className="rounded-md bg-destructive/10 px-3 py-2 text-sm text-destructive">{error}</p>}
 
-      <Button type="submit">請求書を作成</Button>
+      <Button type="submit">{submitLabel}</Button>
     </form>
   );
 }
