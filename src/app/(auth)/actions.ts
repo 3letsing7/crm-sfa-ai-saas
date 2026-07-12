@@ -5,6 +5,17 @@ import { redirect } from "next/navigation";
 import { headers } from "next/headers";
 import { createClient } from "@/lib/supabase/server";
 
+async function getSiteUrl() {
+  const headerList = await headers();
+  const origin = headerList.get("origin");
+  if (origin) return origin;
+
+  // Fallback for environments where the origin header isn't set (e.g. some server contexts)
+  const host = headerList.get("host");
+  const protocol = host?.startsWith("localhost") ? "http" : "https";
+  return `${protocol}://${host}`;
+}
+
 export async function signIn(formData: FormData) {
   const supabase = await createClient();
 
@@ -36,7 +47,7 @@ export async function signUp(formData: FormData) {
     options: {
       data: { full_name: fullName },
       emailRedirectTo: `${siteUrl}/login`,
-    }
+    },
   });
 
   if (error) {
@@ -51,13 +62,4 @@ export async function signOut() {
   await supabase.auth.signOut();
   revalidatePath("/", "layout");
   redirect("/login");
-}
-
-async function getSiteUrl() {
-  const headerList = await headers();
-  const origin = headerList.get("origin");
-  if (origin) return origin;
-  const host = headerList.get("host");
-  const protocol = host?.startsWith("localhost") ? "http" : "https";
-  return `${protocol}://${host}`;
 }
