@@ -20,10 +20,11 @@ cp .env.local.example .env.local
 # .env.local に Supabase の URL / anon key を設定
 ```
 
-Supabaseプロジェクトを作成したら、SQLエディタで以下を実行してスキーマを作成してください:
+Supabaseプロジェクトを作成したら、SQLエディタで以下を**この順番で**実行してスキーマを作成してください:
 
 ```
 supabase/migrations/0001_init.sql
+supabase/migrations/0002_multi_tenant.sql
 ```
 
 （Supabase CLIを使う場合は `supabase db push` でも可）
@@ -36,8 +37,9 @@ npm run dev
 
 ## 実装済み
 
+- **マルチテナント（組織）**: 会社アカウント（`organizations`）に複数の個人ユーザーが所属する構成。サインアップ時に「新しい会社を登録」（会社を作成し招待コードを発行、自分が管理者になる）または「招待コードで参加」（既存の会社にメンバーとして参加）を選択。同じ会社のメンバーは、顧客・商談・タスク・請求書・入金など全データを閲覧・編集可能（RLSで `organization_id` ベースにスコープ）。招待コードは `/settings` で確認・コピーできます。
 - **認証**: Supabase Auth によるログイン・サインアップ・ログアウト（Server Actions）。`proxy.ts` で未ログイン時は `/login` にリダイレクト。
-- **DBスキーマ**: 引き継ぎメモのテーブル定義（customers, deals, activities, tasks, invoices, invoice_items, orders, purchase_orders, payments, expenses, proposals）＋ Enum型 ＋ RLSポリシーを `supabase/migrations/0001_init.sql` に用意。`created_by = auth.uid()` ベースのMVP方針に沿っています。
+- **DBスキーマ**: 引き継ぎメモのテーブル定義（customers, deals, activities, tasks, invoices, invoice_items, orders, purchase_orders, payments, expenses, proposals）＋ Enum型 ＋ 組織スコープのRLSポリシーを `supabase/migrations/` に用意。
 - **顧客管理**: 一覧（検索付き）・新規登録・詳細編集・削除。フル機能で実装済み（他モジュールの実装パターンの参考になります）。
 - **商談管理**: 一覧（顧客名・金額・ステータスバッジ表示）・新規登録。
 - **タスク管理**: 一覧・クイック追加・完了チェック（優先度バッジ付き）。

@@ -3,13 +3,11 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { requireUserAndOrg } from "@/lib/supabase/org";
 
 export async function createDeal(formData: FormData) {
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) redirect("/login");
+  const { user, organizationId } = await requireUserAndOrg(supabase);
 
   const customerId = String(formData.get("customer_id") ?? "");
 
@@ -22,6 +20,7 @@ export async function createDeal(formData: FormData) {
     next_action: String(formData.get("next_action") ?? "") || null,
     assigned_to: user.id,
     created_by: user.id,
+    organization_id: organizationId,
   });
 
   if (error) {

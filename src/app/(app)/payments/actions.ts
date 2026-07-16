@@ -3,13 +3,11 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { requireUserAndOrg } from "@/lib/supabase/org";
 
 export async function createPayment(formData: FormData) {
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) redirect("/login");
+  const { user, organizationId } = await requireUserAndOrg(supabase);
 
   const invoiceId = String(formData.get("invoice_id") ?? "");
   const paidAmount = Number(formData.get("paid_amount") ?? 0);
@@ -43,6 +41,7 @@ export async function createPayment(formData: FormData) {
     method,
     match_status: matchStatus,
     created_by: user.id,
+    organization_id: organizationId,
   });
 
   if (error) {

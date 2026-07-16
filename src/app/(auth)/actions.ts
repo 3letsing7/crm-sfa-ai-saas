@@ -38,6 +38,24 @@ export async function signUp(formData: FormData) {
   const email = String(formData.get("email") ?? "");
   const password = String(formData.get("password") ?? "");
   const fullName = String(formData.get("full_name") ?? "");
+  const orgMode = String(formData.get("org_mode") ?? "create");
+  const companyName = String(formData.get("company_name") ?? "");
+  const inviteCode = String(formData.get("invite_code") ?? "").trim();
+
+  if (orgMode === "create" && !companyName) {
+    redirect(`/signup?error=${encodeURIComponent("会社名を入力してください")}`);
+  }
+  if (orgMode === "join") {
+    if (!inviteCode) {
+      redirect(`/signup?error=${encodeURIComponent("招待コードを入力してください")}`);
+    }
+    const { data: match } = await supabase.rpc("lookup_organization_by_invite_code", {
+      code: inviteCode,
+    });
+    if (!match || match.length === 0) {
+      redirect(`/signup?error=${encodeURIComponent("招待コードが正しくありません")}`);
+    }
+  }
 
   const siteUrl = await getSiteUrl();
 
@@ -45,7 +63,12 @@ export async function signUp(formData: FormData) {
     email,
     password,
     options: {
-      data: { full_name: fullName },
+      data: {
+        full_name: fullName,
+        org_mode: orgMode,
+        company_name: companyName,
+        invite_code: inviteCode,
+      },
       emailRedirectTo: `${siteUrl}/login`,
     },
   });

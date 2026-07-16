@@ -3,13 +3,11 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { requireUserAndOrg } from "@/lib/supabase/org";
 
 export async function createTask(formData: FormData) {
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) redirect("/login");
+  const { user, organizationId } = await requireUserAndOrg(supabase);
 
   const { error } = await supabase.from("tasks").insert({
     title: String(formData.get("title") ?? ""),
@@ -18,6 +16,7 @@ export async function createTask(formData: FormData) {
     due_date: String(formData.get("due_date") ?? "") || null,
     assigned_to: user.id,
     created_by: user.id,
+    organization_id: organizationId,
   });
 
   if (error) {

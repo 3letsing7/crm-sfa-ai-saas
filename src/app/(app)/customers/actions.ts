@@ -3,13 +3,11 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { requireUserAndOrg } from "@/lib/supabase/org";
 
 export async function createCustomer(formData: FormData) {
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) redirect("/login");
+  const { user, organizationId } = await requireUserAndOrg(supabase);
 
   const { error } = await supabase.from("customers").insert({
     company_name: String(formData.get("company_name") ?? ""),
@@ -20,6 +18,7 @@ export async function createCustomer(formData: FormData) {
     status: String(formData.get("status") ?? "lead"),
     memo: String(formData.get("memo") ?? "") || null,
     created_by: user.id,
+    organization_id: organizationId,
   });
 
   if (error) {

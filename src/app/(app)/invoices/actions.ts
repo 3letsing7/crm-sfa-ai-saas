@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { requireUserAndOrg } from "@/lib/supabase/org";
 
 function generateInvoiceNo() {
   const now = new Date();
@@ -21,10 +22,7 @@ export type InvoiceItemInput = {
 
 export async function createInvoice(formData: FormData) {
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) redirect("/login");
+  const { user, organizationId } = await requireUserAndOrg(supabase);
 
   const customerId = String(formData.get("customer_id") ?? "");
   const dealId = String(formData.get("deal_id") ?? "") || null;
@@ -63,6 +61,7 @@ export async function createInvoice(formData: FormData) {
       status: "draft",
       invoice_number_t: invoiceNumberT,
       created_by: user.id,
+      organization_id: organizationId,
     })
     .select("id")
     .single();
@@ -78,6 +77,7 @@ export async function createInvoice(formData: FormData) {
       quantity: i.quantity,
       unit_price: i.unit_price,
       amount: i.quantity * i.unit_price,
+      organization_id: organizationId,
     }))
   );
 
@@ -91,6 +91,7 @@ export async function createInvoice(formData: FormData) {
 
 export async function updateInvoice(id: string, formData: FormData) {
   const supabase = await createClient();
+  const { organizationId } = await requireUserAndOrg(supabase);
 
   const { data: existing } = await supabase.from("invoices").select("status").eq("id", id).single();
   if (!existing || existing.status !== "draft") {
@@ -146,6 +147,7 @@ export async function updateInvoice(id: string, formData: FormData) {
       quantity: i.quantity,
       unit_price: i.unit_price,
       amount: i.quantity * i.unit_price,
+      organization_id: organizationId,
     }))
   );
 

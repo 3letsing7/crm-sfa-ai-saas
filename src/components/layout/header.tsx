@@ -1,4 +1,5 @@
-import { Bell, LogOut } from "lucide-react";
+import Link from "next/link";
+import { Bell, LogOut, Settings } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { signOut } from "@/app/(auth)/actions";
 import { Button } from "@/components/ui/button";
@@ -27,9 +28,17 @@ export async function Header() {
       </span>
       <div className="flex items-center gap-2.5">
         <Bell className="h-[17px] w-[17px] text-muted-foreground" />
-        <div className="flex h-[26px] w-[26px] items-center justify-center rounded-full bg-secondary text-[10px] font-medium text-primary">
+        <Button asChild variant="ghost" size="icon" className="h-[26px] w-[26px]" title="設定">
+          <Link href="/settings">
+            <Settings className="h-[15px] w-[15px]" />
+          </Link>
+        </Button>
+        <Link
+          href="/settings"
+          className="flex h-[26px] w-[26px] items-center justify-center rounded-full bg-secondary text-[10px] font-medium text-primary"
+        >
           {getInitials(user?.email)}
-        </div>
+        </Link>
         <form action={signOut}>
           <Button type="submit" variant="ghost" size="icon" className="h-[26px] w-[26px]" title="ログアウト">
             <LogOut className="h-[15px] w-[15px]" />

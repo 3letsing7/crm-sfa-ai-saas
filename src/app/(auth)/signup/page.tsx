@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
+import { SignupOrgFields } from "@/components/auth/signup-org-fields";
 
 export default async function SignupPage({
   searchParams,
@@ -28,6 +29,8 @@ export default async function SignupPage({
             <Label htmlFor="password">パスワード</Label>
             <Input id="password" name="password" type="password" required minLength={6} placeholder="6文字以上" />
           </div>
+
+          <SignupOrgFields />
 
           {params.error && (
             <p className="rounded-md bg-destructive/10 px-3 py-2 text-sm text-destructive">
