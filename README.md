@@ -25,6 +25,7 @@ Supabaseプロジェクトを作成したら、SQLエディタで以下を**こ�
 ```
 supabase/migrations/0001_init.sql
 supabase/migrations/0002_multi_tenant.sql
+supabase/migrations/0003_stripe_checkout.sql
 ```
 
 （Supabase CLIを使う場合は `supabase db push` でも可）
@@ -34,6 +35,15 @@ npm run dev
 ```
 
 `/signup` からアカウントを作成 → `/login` でログイン → `/dashboard` にリダイレクトされます。
+
+## Stripe決済のセットアップ
+
+1. https://dashboard.stripe.com/apikeys （テストモード）から **Secret key** をコピーし `.env.local` の `STRIPE_SECRET_KEY` に設定
+2. Supabase → **Settings → API** の **service_role key** をコピーし `.env.local` の `SUPABASE_SERVICE_ROLE_KEY` に設定（このキーはRLSを完全にバイパスするため、サーバーサイド専用・`NEXT_PUBLIC_` を付けないこと）
+3. Webhookの設定:
+   - **ローカル開発時**: [Stripe CLI](https://docs.stripe.com/stripe-cli) を使い `stripe listen --forward-to localhost:3000/api/stripe/webhook` を実行すると、表示される `whsec_...` を `.env.local` の `STRIPE_WEBHOOK_SECRET` に設定
+   - **本番環境**: Stripeダッシュボード → **Developers → Webhooks → Add endpoint** で `https://<本番ドメイン>/api/stripe/webhook` を登録し、イベントは **`checkout.session.completed`** を選択。発行される signing secret を Vercel の Environment Variables に `STRIPE_WEBHOOK_SECRET` として設定（設定後は Redeploy を忘れずに）
+4. 動作確認: 請求書を作成 →ステータスを「送付済み」に→ `/checkout` または請求書詳細ページから決済リンクをコピー → シークレットウィンドウで開き、Stripeのテストカード（`4242 4242 4242 4242` / 任意の将来の有効期限 / 任意のCVC）で支払い、請求書が自動で「入金済み」になるか確認
 
 ## 実装済み
 
@@ -48,15 +58,13 @@ npm run dev
 - **受注管理**: 一覧・新規登録（顧客・請求書と紐付け）・進捗管理（未着手/進行中/完了/キャンセル）。
 - **発注・仕入管理**: 一覧・新規登録・入荷状況管理（未入荷/入荷済み/キャンセル）・支払状況表示。
 - **支払管理**: 一覧・支払登録（発注と紐付け可）・支払済みへの更新。支払済みにすると、紐づく発注の支払状況も自動更新。
+- **Stripe決済連携**: 送付済み・期限超過の請求書に対して決済リンクを発行（`/checkout` 画面、または請求書詳細ページの「決済リンクをコピー」）。顧客は認証不要の `/pay/[invoiceId]` ページでカード決済でき、Stripe Webhook（`app/api/stripe/webhook/route.ts`）が決済完了を検知して `payments` テーブルへ記録＋請求書ステータスを自動で `paid` に更新します。
 - **ダッシュボード**: 顧客数・パイプライン総額・未完了タスク数・最近の商談をSupabaseから実データで集計表示。
 - **レイアウト**: サイドバー（引き継ぎメモの11画面すべてにリンク）＋ ヘッダー（ユーザー表示・ログアウト・設定）。
 
 ## 未実装（スタブページとして骨組みのみ）
 
-以下は `src/app/(app)/{checkout,ai}/page.tsx` に、実装すべき内容を明記したプレースホルダーを置いています。他モジュールと同じ実装パターン（`actions.ts` の Server Action + 一覧 + 新規作成フォーム）で進められます。
-
-1. **顧客向け決済画面**（`/checkout`）— これは**認証不要の公開ページ**にする必要があるため、`proxy.ts` の `PUBLIC_PATHS` に追加し、Stripe Checkout Session 発行用の Route Handler（`app/api/checkout/route.ts`）を新設してください
-2. **AI営業支援**（Phase 2）— OpenAI API (GPT-4o) 連携。`OPENAI_API_KEY` を環境変数に追加し、`proposals` テーブルへ生成結果を保存
+1. **AI営業支援**（Phase 2）— OpenAI API (GPT-4o) 連携。`OPENAI_API_KEY` を環境変数に追加し、`proposals` テーブルへ生成結果を保存
 
 ## GitHubへの反映について
 

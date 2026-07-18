@@ -4,6 +4,7 @@ import { Plus, Pencil } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { deleteInvoice } from "@/app/(app)/invoices/actions";
 import { InvoiceStatusActions } from "@/components/invoices/invoice-status-actions";
+import { CopyPaymentLink } from "@/components/invoices/copy-payment-link";
 import { DeleteButton } from "@/components/ui/delete-button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -72,6 +73,7 @@ export default async function InvoiceDetailPage({
         </div>
         <div className="flex items-center gap-2">
           <Badge variant={STATUS_VARIANT[status]}>{STATUS_LABEL[status]}</Badge>
+          {(status === "sent" || status === "overdue") && <CopyPaymentLink invoiceId={id} />}
           {status === "draft" && (
             <Button asChild size="sm" variant="outline">
               <Link href={`/invoices/${id}/edit`}>
