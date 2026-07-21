@@ -29,32 +29,39 @@ export async function POST(request: NextRequest) {
 
   const origin = request.headers.get("origin") ?? request.nextUrl.origin;
 
-  const session = await stripe.checkout.sessions.create({
-    mode: "payment",
-    payment_method_types: ["card"],
-    line_items: [
-      {
-        price_data: {
-          currency: "jpy",
-          // JPY is a zero-decimal currency for Stripe — the amount is
-          // the yen value itself, not multiplied by 100.
-          unit_amount: Math.round(invoice.total),
-          product_data: {
-            name: `請求書 ${invoice.invoice_no}`,
-            description: invoice.company_name,
+  try {
+    const session = await stripe.checkout.sessions.create({
+      mode: "payment",
+      payment_method_types: ["card"],
+      line_items: [
+        {
+          price_data: {
+            currency: "jpy",
+            // JPY is a zero-decimal currency for Stripe — the amount is
+            // the yen value itself, not multiplied by 100.
+            unit_amount: Math.round(invoice.total),
+            product_data: {
+              name: `請求書 ${invoice.invoice_no}`,
+              description: invoice.company_name,
+            },
           },
+          quantity: 1,
         },
-        quantity: 1,
-      },
-    ],
-    metadata: { invoice_id: invoice.id },
-    success_url: `${origin}/pay/${invoice.id}?status=success`,
-    cancel_url: `${origin}/pay/${invoice.id}?status=cancelled`,
-  });
+      ],
+      metadata: { invoice_id: invoice.id },
+      success_url: `${origin}/pay/${invoice.id}?status=success`,
+      cancel_url: `${origin}/pay/${invoice.id}?status=cancelled`,
+    });
 
-  if (!session.url) {
-    return NextResponse.json({ error: "決済セッションの作成に失敗しました" }, { status: 500 });
+    if (!session.url) {
+      return NextResponse.json({ error: "決済セッションの作成に失敗しました" }, { status: 500 });
+    }
+
+    return NextResponse.redirect(session.url, { status: 303 });
+  } catch (err) {
+    // Logged so it shows up in Vercel's function logs (Deployments → function → Logs).
+    console.error("[api/checkout] Stripe session creation failed:", err);
+    const message = err instanceof Error ? err.message : "決済セッションの作成に失敗しました";
+    return NextResponse.json({ error: message }, { status: 500 });
   }
-
-  return NextResponse.redirect(session.url, { status: 303 });
 }
